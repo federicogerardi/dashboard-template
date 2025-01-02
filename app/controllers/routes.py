@@ -5,6 +5,7 @@ from app.models.user import User, UserRole
 from app.utils.decorators import role_required
 from app.utils.security import sanitize_input, validate_json_request, validate_username
 from app import db
+from werkzeug.security import generate_password_hash
 
 # Creazione del blueprint
 main = Blueprint('main', __name__)
@@ -121,51 +122,75 @@ def delete_user(user_id):
 
 @main.route('/admin/users', methods=['POST'])
 @login_required
-@role_required('admin')
-@validate_json_request(['username', 'email', 'password', 'role'])
 def create_user():
-    data = request.get_json()
-    
-    # Validazione e sanitizzazione username
-    valid_username = validate_username(data['username'])
-    if not valid_username:
+    try:
+        print("1. Inizio creazione utente")
+        # Verifica che l'utente corrente sia admin
+        if not current_user.is_admin():
+            print("2. Utente non autorizzato")
+            return jsonify({'message': 'Non autorizzato'}), 403
+        
+        data = request.get_json()
+        print("3. Dati ricevuti:", data)
+        
+        # Validazione dati
+        required_fields = ['username', 'email', 'password', 'role']
+        if not all(key in data for key in required_fields):
+            missing_fields = [field for field in required_fields if field not in data]
+            print("4. Campi mancanti:", missing_fields)
+            return jsonify({
+                'message': f'Dati mancanti: {", ".join(missing_fields)}',
+                'error': 'missing_fields'
+            }), 400
+            
+        # Validazione username
+        if User.query.filter_by(username=data['username']).first():
+            print("5. Username già esistente")
+            return jsonify({
+                'message': 'Username già in uso',
+                'error': 'username_exists'
+            }), 400
+            
+        # Validazione email
+        if User.query.filter_by(email=data['email']).first():
+            print("6. Email già esistente")
+            return jsonify({
+                'message': 'Email già in uso',
+                'error': 'email_exists'
+            }), 400
+            
+        # Creazione nuovo utente
+        print("7. Creazione nuovo utente")
+        new_user = User(
+            username=data['username'],
+            email=data['email'],
+            password_hash=generate_password_hash(data['password']),
+            role=data['role'],
+            created_at=datetime.utcnow()
+        )
+        
+        db.session.add(new_user)
+        db.session.commit()
+        print("8. Utente creato con successo")
+        
         return jsonify({
-            'message': 'Username non valido: usa solo lettere minuscole, numeri e underscore',
-            'error': 'invalid_username'
-        }), 400
-    
-    # Verifica username duplicato
-    if User.query.filter_by(username=valid_username).first():
+            'message': 'Utente creato con successo',
+            'user': {
+                'id': new_user.id,
+                'username': new_user.username,
+                'email': new_user.email,
+                'role': new_user.role
+            }
+        }), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        print("ERROR:", str(e))
+        current_app.logger.error(f"Errore durante la creazione dell'utente: {str(e)}")
         return jsonify({
-            'message': 'Username già in uso',
-            'error': 'username_exists'
-        }), 400
-    
-    # Verifica email duplicata
-    if User.query.filter_by(email=data['email']).first():
-        return jsonify({
-            'message': 'Email già registrata',
-            'error': 'email_exists'
-        }), 400
-    
-    # Validazione ruolo
-    if data['role'] not in [role.value for role in UserRole]:
-        return jsonify({'message': 'Ruolo non valido'}), 400
-    
-    # Creazione nuovo utente
-    user = User(
-        username=valid_username,
-        email=data['email'],
-        role=data['role']
-    )
-    user.set_password(data['password'])
-    
-    db.session.add(user)
-    db.session.commit()
-    
-    current_app.logger.info(f'Utente {current_user.username} ha creato un nuovo utente: {user.username}')
-    
-    return jsonify({'message': 'Utente creato con successo'})
+            'message': 'Errore durante la creazione dell\'utente',
+            'error': str(e)
+        }), 500
 
 @main.route('/profile')
 @login_required

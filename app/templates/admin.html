@@ -237,37 +237,49 @@ async function createUser() {
     const password = document.getElementById('newPassword').value;
     const role = document.getElementById('newUserRole').value;
     
+    const userData = { 
+        username,
+        email,
+        password,
+        role
+    };
+    
+    console.log('Invio dati:', userData); // Debug
+    
     try {
         const response = await fetch('/admin/users', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'  // Aggiungiamo il CSRF token
             },
-            body: JSON.stringify({ 
-                username,
-                email,
-                password,
-                role
-            })
+            body: JSON.stringify(userData)
         });
         
         const data = await response.json();
+        console.log('Risposta server:', data); // Debug
         
         if (response.ok) {
             createModal.hide();
             location.reload();
         } else {
-            // Gestione errori specifici
+            // Gestione errori dettagliata
             if (data.error === 'username_exists') {
                 document.getElementById('newUsername').classList.add('is-invalid');
+                alert('Username già in uso');
             } else if (data.error === 'email_exists') {
                 document.getElementById('newEmail').classList.add('is-invalid');
+                alert('Email già in uso');
+            } else if (data.error === 'missing_fields') {
+                alert('Campi mancanti: ' + data.message);
             } else {
-                alert(data.message);
+                alert('Errore: ' + data.message);
             }
+            console.error('Errore dettagliato:', data); // Debug
         }
     } catch (error) {
-        alert('Errore durante la creazione dell\'utente');
+        console.error('Errore di rete:', error); // Debug
+        alert('Errore durante la creazione dell\'utente: ' + error);
     }
 }
 
