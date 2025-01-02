@@ -25,6 +25,16 @@
                     <div class="mb-3">
                         {{ form.password.label(class="form-label") }}
                         {{ form.password(class="form-control") }}
+                        <div class="form-text">
+                            La password deve contenere almeno:
+                            <ul class="mb-0">
+                                <li>12 caratteri</li>
+                                <li>Una lettera maiuscola</li>
+                                <li>Una lettera minuscola</li>
+                                <li>Un numero</li>
+                                <li>Un carattere speciale (@$!%*?&)</li>
+                            </ul>
+                        </div>
                         {% for error in form.password.errors %}
                             <div class="text-danger small">{{ error }}</div>
                         {% endfor %}

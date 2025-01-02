@@ -23,8 +23,6 @@ def dashboard():
     if current_user.created_at is None:
         current_user.created_at = datetime.utcnow()
     
-    # Aggiorna statistiche utente
-    current_user.login_count += 1
     current_user.last_login = datetime.utcnow()
     db.session.commit()
     
@@ -126,16 +124,33 @@ def delete_user(user_id):
 
 @main.route('/admin/users', methods=['POST'])
 @login_required
+@role_required('admin')
 def create_user():
     try:
-        print("1. Inizio creazione utente")
-        # Verifica che l'utente corrente sia admin
+        current_app.logger.info(f"Tentativo creazione utente da admin {current_user.username}")
+        
         if not current_user.is_admin():
-            print("2. Utente non autorizzato")
+            current_app.logger.warning(f"Tentativo non autorizzato di creazione utente da {current_user.username}")
             return jsonify({'message': 'Non autorizzato'}), 403
         
         data = request.get_json()
-        print("3. Dati ricevuti:", data)
+        current_app.logger.debug(f"Dati ricevuti per creazione utente: {data}")
+        
+        # Validazione password
+        is_valid, error_message = validate_password(data.get('password', ''))
+        if not is_valid:
+            current_app.logger.warning(f"Tentativo creazione utente con password non valida da {current_user.username}")
+            return jsonify({
+                'message': error_message,
+                'error': 'invalid_password'
+            }), 400
+            
+        # Sanitizzazione input
+        username = sanitize_input(data.get('username', '').lower())
+        email = sanitize_input(data.get('email', '').lower())
+        role = sanitize_input(data.get('role', ''))
+        
+        current_app.logger.info(f"Creazione utente {username} con ruolo {role} da admin {current_user.username}")
         
         # Validazione dati
         required_fields = ['username', 'email', 'password', 'role']
@@ -177,6 +192,11 @@ def create_user():
         db.session.commit()
         print("8. Utente creato con successo")
         
+        current_app.logger.info(
+            f"Admin {current_user.username} ha creato nuovo utente: "
+            f"{new_user.username} con ruolo {new_user.role}"
+        )
+        
         return jsonify({
             'message': 'Utente creato con successo',
             'user': {
@@ -188,18 +208,14 @@ def create_user():
         }), 201
         
     except Exception as e:
-        db.session.rollback()
-        print("ERROR:", str(e))
-        current_app.logger.error(f"Errore durante la creazione dell'utente: {str(e)}")
-        return jsonify({
-            'message': 'Errore durante la creazione dell\'utente',
-            'error': str(e)
-        }), 500
+        current_app.logger.error(f"Errore durante creazione utente da admin {current_user.username}: {str(e)}")
+        return jsonify({'message': 'Errore interno del server'}), 500
 
 @main.route('/profile')
 @login_required
 def profile():
-    return render_template('profile.html')
+    current_app.logger.info(f"Accesso al profilo utente: {current_user.username}")
+    return render_template('profile.html', user=current_user)
 
 @main.route('/update_theme', methods=['POST'])
 @login_required

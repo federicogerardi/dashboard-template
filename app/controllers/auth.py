@@ -20,26 +20,19 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data.lower()).first()
-        if user is None or not user.check_password(form.password.data):
-            log_security_event(
-                'LOGIN_FAILED',
-                form.username.data,
-                request.remote_addr,
-                'Invalid credentials'
-            )
-            flash('Username o password non validi')
-            return redirect(url_for('auth.login'))
+        if user and user.check_password(form.password.data):
+            # Incrementiamo il contatore qui, al login effettivo
+            user.login_count += 1
+            user.last_login = datetime.utcnow()
+            db.session.commit()
             
-        login_user(user)
-        log_security_event(
-            'LOGIN_SUCCESS',
-            user.id,
-            request.remote_addr,
-            'Successful login'
-        )
-        return redirect(url_for('main.dashboard'))
-        
-    return render_template('login.html', form=form)
+            login_user(user, remember=form.remember_me.data)
+            next_page = request.args.get('next')
+            if not next_page or url_parse(next_page).netloc != '':
+                next_page = url_for('main.dashboard')
+            return redirect(next_page)
+        flash('Username o password non validi', 'error')
+    return render_template('auth/login.html', form=form)
 
 @auth.route('/logout')
 @login_required
@@ -57,23 +50,42 @@ def register():
         return redirect(url_for('main.dashboard'))
     
     form = RegistrationForm()
+    
+    # Aggiungiamo debug per la validazione
+    if request.method == 'POST':
+        current_app.logger.debug(f"Form data: {request.form}")
+        current_app.logger.debug(f"Form validation: {form.validate()}")
+        if form.errors:
+            current_app.logger.debug(f"Form errors: {form.errors}")
+    
     if form.validate_on_submit():
+        # Sanitizzazione input
+        username = sanitize_input(form.username.data.lower())
+        email = sanitize_input(form.email.data.lower())
+        
+        current_app.logger.info(f"Tentativo registrazione per username: {username}")
+        
         is_first_user = User.query.first() is None
         
         user = User(
-            username=form.username.data,
-            email=form.email.data,
+            username=username,
+            email=email,
             role=UserRole.ADMIN.value if is_first_user else UserRole.USER.value
         )
         user.set_password(form.password.data)
         
-        db.session.add(user)
-        db.session.commit()
-        
-        flash('Registrazione completata con successo!')
-        return redirect(url_for('auth.login'))
+        try:
+            db.session.add(user)
+            db.session.commit()
+            current_app.logger.info(f"Utente {user.username} registrato con successo")
+            flash('Registrazione completata con successo!')
+            return redirect(url_for('auth.login'))
+        except Exception as e:
+            current_app.logger.error(f"Errore durante la registrazione: {str(e)}")
+            db.session.rollback()
+            flash('Errore durante la registrazione. Riprova più tardi.', 'error')
     
-    return render_template('register.html', form=form)
+    return render_template('auth/register.html', form=form)
 
 @auth.before_request
 def before_request():

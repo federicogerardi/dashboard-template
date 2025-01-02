@@ -50,3 +50,10 @@ instance/*
 # Migrations pycache specifico
 migrations/__pycache__/
 migrations/versions/__pycache__/
+
+# Database files
+instance/*.db
+instance/*.sqlite
+
+# Mantieni solo .gitkeep
+!instance/.gitkeep

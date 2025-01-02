@@ -74,3 +74,26 @@ def validate_username(username):
         return None
         
     return username
+
+def validate_password(password: str) -> tuple[bool, str]:
+    """Valida la password secondo i criteri di sicurezza.
+    
+    Returns:
+        tuple: (is_valid, error_message)
+    """
+    if len(password) < 12:
+        return False, 'La password deve essere di almeno 12 caratteri'
+    
+    if not any(c.isupper() for c in password):
+        return False, 'La password deve contenere almeno una lettera maiuscola'
+    
+    if not any(c.islower() for c in password):
+        return False, 'La password deve contenere almeno una lettera minuscola'
+    
+    if not any(c.isdigit() for c in password):
+        return False, 'La password deve contenere almeno un numero'
+    
+    if not any(c in '@$!%*?&' for c in password):
+        return False, 'La password deve contenere almeno un carattere speciale (@$!%*?&)'
+    
+    return True, ''
