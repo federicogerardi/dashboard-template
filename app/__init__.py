@@ -9,6 +9,19 @@ from app.utils.errors import register_error_handlers
 from app.utils.logger import setup_logger
 from app.utils.limiter import init_limiter, limiter
 import os
+from dotenv import load_dotenv
+
+# Ottieni il percorso assoluto della directory dell'app
+basedir = os.path.abspath(os.path.dirname(__file__))
+env_path = os.path.join(os.path.dirname(basedir), '.env')
+
+# Carica variabili d'ambiente PRIMA di tutto
+load_dotenv(env_path, override=True)
+
+# Debug per verificare il caricamento
+print("\nVariabili d'ambiente dopo load_dotenv:")
+print(f"DATABASE_URL: {os.getenv('DATABASE_URL')}")
+print(f"APP_ENV: {os.getenv('APP_ENV')}")
 
 # Inizializzazione delle estensioni
 db = SQLAlchemy()
@@ -21,11 +34,21 @@ def create_app(config_name=None):
     app = Flask(__name__)
     
     if config_name is None:
-        config_name = os.environ.get('APP_ENV', 'default')
+        config_name = os.getenv('APP_ENV', 'development')
     
-    # Debug per verificare configurazione
-    app.logger.info(f"Inizializzazione app con configurazione: {config_name}")
-    app.config.from_object(config[config_name])
+    print(f"\nPrima di from_object:")
+    print(f"config_name: {config_name}")
+    print(f"DATABASE_URL: {os.getenv('DATABASE_URL')}")
+    
+    # Crea un'istanza della configurazione
+    app_config = config[config_name]()
+    app.config.from_object(app_config)
+    
+    print(f"\nDopo from_object:")
+    print(f"SQLALCHEMY_DATABASE_URI: {app.config.get('SQLALCHEMY_DATABASE_URI')}")
+    
+    # Debug della configurazione
+    app.logger.info(f"Configurazione caricata: {config_name}")
     app.logger.info(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
     
     # Inizializzazione delle estensioni
@@ -60,22 +83,19 @@ def create_app(config_name=None):
         app.register_blueprint(main)
         app.register_blueprint(auth)
         
-        # Crea tutte le tabelle se non esistono
-        db.create_all()
-        
         # Verifica se le tabelle sono state create
         inspector = inspect(db.engine)
         tables = inspector.get_table_names()
         
         if 'user' not in tables:
-            app.logger.error("ATTENZIONE: La tabella 'user' non è stata creata correttamente!")
+            app.logger.warning("La tabella 'user' non esiste - verrà creata dalle migrazioni")
         else:
             app.logger.info("Database inizializzato con successo!")
             
         # Registra funzioni di utilità nei template
         register_template_utils(app)
-    
-    return app
+        
+        return app
 
 def register_template_utils(app):
     """Registra funzioni di utilità per i template"""

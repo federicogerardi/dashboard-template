@@ -8,6 +8,7 @@ from app.models.user import UserRole
 from datetime import datetime, timedelta, timezone
 from app.utils.limiter import limiter
 from app.utils.logger import log_security_event
+from app.utils.security import sanitize_input
 
 auth = Blueprint('auth', __name__)
 
@@ -61,7 +62,7 @@ def register():
     if form.validate_on_submit():
         # Sanitizzazione input
         username = sanitize_input(form.username.data.lower())
-        email = sanitize_input(form.email.data.lower())
+        email = sanitize_input(form.email.data.lower(), allow_email=True)
         
         current_app.logger.info(f"Tentativo registrazione per username: {username}")
         

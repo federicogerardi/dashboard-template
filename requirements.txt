@@ -16,3 +16,6 @@ argon2-cffi==21.3.0
 pyOpenSSL==23.2.0
 pytest==7.4.3
 pytest-cov==4.1.0
+
+# Database
+psycopg[binary]>=3.1.18

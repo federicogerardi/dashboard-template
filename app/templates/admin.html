@@ -8,6 +8,40 @@
         <div class="col-12">
             <h1 class="mb-4">Pannello di Amministrazione</h1>
             
+            <!-- Debug Database Info -->
+            <div class="card mb-4">
+                <div class="card-header bg-light d-flex align-items-center">
+                    <i class="fas fa-database me-2"></i>
+                    <small class="fw-bold">Database Info</small>
+                </div>
+                <div class="card-body py-2">
+                    <div class="row g-2">
+                        <div class="col-auto">
+                            <small class="text-muted">
+                                <strong>DB:</strong> 
+                                {% if 'sqlite' in database_url %}
+                                    <span class="badge bg-secondary">SQLite</span>
+                                {% else %}
+                                    <span class="badge bg-info">PostgreSQL</span>
+                                {% endif %}
+                            </small>
+                        </div>
+                        <div class="col-auto">
+                            <small class="text-muted">
+                                <strong>ENV:</strong> 
+                                {% if app_env == 'production' %}
+                                    <span class="badge bg-danger">Production</span>
+                                {% elif app_env == 'testing' %}
+                                    <span class="badge bg-warning">Testing</span>
+                                {% else %}
+                                    <span class="badge bg-success">Development</span>
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Statistiche -->
             <div class="row mb-4">
                 <div class="col-md-4">

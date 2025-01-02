@@ -57,3 +57,10 @@ instance/*.sqlite
 
 # Mantieni solo .gitkeep
 !instance/.gitkeep
+backup_sqlite.sql
+
+# Backup files
+backups/*
+!backups/.gitkeep
+!backups/sqlite/.gitkeep
+!backups/postgres/.gitkeep

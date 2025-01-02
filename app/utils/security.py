@@ -6,7 +6,7 @@ import html
 import unicodedata
 import os
 
-def sanitize_input(text):
+def sanitize_input(text, allow_email=False):
     """Sanitizza input per prevenire XSS e injection"""
     if not text:
         return text
@@ -17,8 +17,12 @@ def sanitize_input(text):
     # Rimuove HTML
     text = html.escape(text)
     
-    # Rimuove caratteri pericolosi
-    text = re.sub(r'[^\w\s-]', '', text)
+    if allow_email:
+        # Per email, permetti caratteri speciali necessari
+        text = re.sub(r'[^\w\s@.-]', '', text)
+    else:
+        # Per altri input, rimuovi caratteri speciali
+        text = re.sub(r'[^\w\s-]', '', text)
     
     # Normalizza spazi
     text = ' '.join(text.split())

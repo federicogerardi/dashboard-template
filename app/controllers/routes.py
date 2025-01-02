@@ -6,6 +6,8 @@ from app.utils.decorators import role_required
 from app.utils.security import sanitize_input, validate_json_request, validate_username
 from app import db
 from werkzeug.security import generate_password_hash
+import os
+from app.forms import RegistrationForm  # Importa il form di registrazione
 
 # Creazione del blueprint
 main = Blueprint('main', __name__)
@@ -59,22 +61,25 @@ def admin_panel():
     # Recupera tutti gli utenti ordinati per ID
     users = User.query.order_by(User.id).all()
     
-    # Calcola alcune statistiche di base
+    # Calcola statistiche
     total_users = User.query.count()
-    
-    # Considera attivi gli utenti che hanno effettuato l'accesso negli ultimi 7 giorni
     seven_days_ago = datetime.utcnow() - timedelta(days=7)
     active_users = User.query.filter(User.last_login >= seven_days_ago).count()
-    
     new_users = User.query.filter(
         User.created_at >= datetime.utcnow() - timedelta(days=1)
     ).count()
+    
+    # Ottieni informazioni sul database
+    database_url = current_app.config['SQLALCHEMY_DATABASE_URI']
+    app_env = os.getenv('APP_ENV', 'development')  # Usa APP_ENV dal .env
     
     return render_template('admin.html',
                          users=users,
                          total_users=total_users,
                          active_users=active_users,
-                         new_users=new_users)
+                         new_users=new_users,
+                         database_url=database_url,
+                         app_env=app_env)
 
 @main.route('/editor')
 @login_required
@@ -124,92 +129,57 @@ def delete_user(user_id):
 
 @main.route('/admin/users', methods=['POST'])
 @login_required
-@role_required('admin')
 def create_user():
+    """Crea un nuovo utente (solo admin)"""
+    if not current_user.is_admin():
+        return jsonify({'status': 'error', 'message': 'Accesso non autorizzato'}), 403
+    
+    data = request.get_json()
+    current_app.logger.info(f"Tentativo creazione utente da admin {current_user.username}")
+    current_app.logger.debug(f"Dati ricevuti per creazione utente: {data}")
+    
     try:
-        current_app.logger.info(f"Tentativo creazione utente da admin {current_user.username}")
+        # Validazione dati
+        if not all(k in data for k in ('username', 'email', 'password', 'role')):
+            return jsonify({'status': 'error', 'error': 'missing_fields', 
+                          'message': 'Campi mancanti'}), 400
         
-        if not current_user.is_admin():
-            current_app.logger.warning(f"Tentativo non autorizzato di creazione utente da {current_user.username}")
-            return jsonify({'message': 'Non autorizzato'}), 403
+        # Verifica username univoco
+        if User.query.filter_by(username=data['username'].lower()).first():
+            return jsonify({'status': 'error', 'error': 'username_exists', 
+                          'message': 'Username già in uso'}), 400
         
-        data = request.get_json()
-        current_app.logger.debug(f"Dati ricevuti per creazione utente: {data}")
+        # Verifica email unica
+        if User.query.filter_by(email=data['email'].lower()).first():
+            return jsonify({'status': 'error', 'error': 'email_exists', 
+                          'message': 'Email già in uso'}), 400
         
         # Validazione password
-        is_valid, error_message = validate_password(data.get('password', ''))
-        if not is_valid:
-            current_app.logger.warning(f"Tentativo creazione utente con password non valida da {current_user.username}")
-            return jsonify({
-                'message': error_message,
-                'error': 'invalid_password'
-            }), 400
-            
-        # Sanitizzazione input
-        username = sanitize_input(data.get('username', '').lower())
-        email = sanitize_input(data.get('email', '').lower())
-        role = sanitize_input(data.get('role', ''))
+        form = RegistrationForm()
+        try:
+            form.validate_password(type('obj', (), {'data': data['password']}))
+        except ValidationError as e:
+            return jsonify({'status': 'error', 'error': 'invalid_password', 
+                          'message': str(e)}), 400
         
-        current_app.logger.info(f"Creazione utente {username} con ruolo {role} da admin {current_user.username}")
-        
-        # Validazione dati
-        required_fields = ['username', 'email', 'password', 'role']
-        if not all(key in data for key in required_fields):
-            missing_fields = [field for field in required_fields if field not in data]
-            print("4. Campi mancanti:", missing_fields)
-            return jsonify({
-                'message': f'Dati mancanti: {", ".join(missing_fields)}',
-                'error': 'missing_fields'
-            }), 400
-            
-        # Validazione username
-        if User.query.filter_by(username=data['username']).first():
-            print("5. Username già esistente")
-            return jsonify({
-                'message': 'Username già in uso',
-                'error': 'username_exists'
-            }), 400
-            
-        # Validazione email
-        if User.query.filter_by(email=data['email']).first():
-            print("6. Email già esistente")
-            return jsonify({
-                'message': 'Email già in uso',
-                'error': 'email_exists'
-            }), 400
-            
-        # Creazione nuovo utente
-        print("7. Creazione nuovo utente")
-        new_user = User(
-            username=data['username'],
-            email=data['email'],
-            password_hash=generate_password_hash(data['password']),
-            role=data['role'],
-            created_at=datetime.utcnow()
+        # Crea nuovo utente
+        user = User(
+            username=data['username'].lower(),
+            email=data['email'].lower(),
+            role=data['role']
         )
+        user.set_password(data['password'])
         
-        db.session.add(new_user)
+        db.session.add(user)
         db.session.commit()
-        print("8. Utente creato con successo")
         
-        current_app.logger.info(
-            f"Admin {current_user.username} ha creato nuovo utente: "
-            f"{new_user.username} con ruolo {new_user.role}"
-        )
-        
-        return jsonify({
-            'message': 'Utente creato con successo',
-            'user': {
-                'id': new_user.id,
-                'username': new_user.username,
-                'email': new_user.email,
-                'role': new_user.role
-            }
-        }), 201
+        current_app.logger.info(f"Utente {user.username} creato con successo da admin {current_user.username}")
+        return jsonify({'status': 'success', 'message': 'Utente creato con successo'})
         
     except Exception as e:
         current_app.logger.error(f"Errore durante creazione utente da admin {current_user.username}: {str(e)}")
-        return jsonify({'message': 'Errore interno del server'}), 500
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': 'Errore interno del server'}), 500
 
 @main.route('/profile')
 @login_required
@@ -226,3 +196,13 @@ def update_theme():
         db.session.commit()
         return jsonify({'status': 'success'})
     return jsonify({'status': 'error'}), 400
+
+@main.route('/debug-config')
+def debug_config():
+    """Endpoint temporaneo per debug configurazione"""
+    config_info = {
+        'DATABASE_URL': os.getenv('DATABASE_URL'),
+        'APP_ENV': os.getenv('APP_ENV'),
+        'SQLALCHEMY_DATABASE_URI': current_app.config['SQLALCHEMY_DATABASE_URI']
+    }
+    return jsonify(config_info)

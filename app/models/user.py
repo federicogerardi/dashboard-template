@@ -20,12 +20,12 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128))
+    password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), nullable=False, default=UserRole.USER.value)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime, default=None)
     login_count = db.Column(db.Integer, default=0)
-    theme_preference = db.Column(db.String(10), default='light')
+    theme_preference = db.Column(db.String(20), default='light')
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
