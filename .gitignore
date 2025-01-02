@@ -40,7 +40,8 @@ coverage.xml
 *.cover
 
 # Instance folder
-instance/
+instance/*
+!instance/.gitkeep
 
 # Redis dump file
 *.rdb
