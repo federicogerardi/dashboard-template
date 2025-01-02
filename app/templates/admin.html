@@ -186,18 +186,21 @@ async function updateUser() {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
             },
             body: JSON.stringify({ role })
         });
         
         const data = await response.json();
+        console.log('Risposta server:', data);
         
         if (response.ok) {
             location.reload();
         } else {
-            alert(data.message);
+            alert(data.message || 'Errore durante l\'aggiornamento');
         }
     } catch (error) {
+        console.error('Errore di rete:', error);
         alert('Errore durante l\'aggiornamento');
     }
 }
@@ -209,17 +212,22 @@ async function deleteUser(userId, username) {
     
     try {
         const response = await fetch(`/admin/users/${userId}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
         });
         
         const data = await response.json();
+        console.log('Risposta server:', data);
         
         if (response.ok) {
             location.reload();
         } else {
-            alert(data.message);
+            alert(data.message || 'Errore durante l\'eliminazione');
         }
     } catch (error) {
+        console.error('Errore di rete:', error);
         alert('Errore durante l\'eliminazione');
     }
 }
