@@ -63,7 +63,11 @@ def admin_panel():
     
     # Calcola alcune statistiche di base
     total_users = User.query.count()
-    active_users = total_users  # Per ora sono tutti attivi
+    
+    # Considera attivi gli utenti che hanno effettuato l'accesso negli ultimi 7 giorni
+    seven_days_ago = datetime.utcnow() - timedelta(days=7)
+    active_users = User.query.filter(User.last_login >= seven_days_ago).count()
+    
     new_users = User.query.filter(
         User.created_at >= datetime.utcnow() - timedelta(days=1)
     ).count()
