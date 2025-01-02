@@ -8,6 +8,7 @@ from app.config import config
 from app.utils.errors import register_error_handlers
 from app.utils.logger import setup_logger
 from app.utils.limiter import init_limiter, limiter
+import os
 
 # Inizializzazione delle estensioni
 db = SQLAlchemy()
@@ -15,12 +16,17 @@ migrate = Migrate()
 login_manager = LoginManager()
 csrf = CSRFProtect()
 
-def create_app(config_name='default'):
+def create_app(config_name=None):
     """Factory pattern per la creazione dell'app"""
     app = Flask(__name__)
     
-    # Carica la configurazione in base all'ambiente
+    if config_name is None:
+        config_name = os.environ.get('APP_ENV', 'default')
+    
+    # Debug per verificare configurazione
+    app.logger.info(f"Inizializzazione app con configurazione: {config_name}")
     app.config.from_object(config[config_name])
+    app.logger.info(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
     
     # Inizializzazione delle estensioni
     db.init_app(app)
