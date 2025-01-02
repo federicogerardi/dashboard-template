@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Login</h2>
+                <form method="POST" action="{{ url_for('auth.login') }}">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.username.label(class="form-label") }}
+                        {{ form.username(class="form-control") }}
+                        {% for error in form.username.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.password.label(class="form-label") }}
+                        {{ form.password(class="form-control") }}
+                        {% for error in form.password.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {{ form.submit(class="btn btn-primary w-100") }}
+                </form>
+                <div class="text-center mt-3">
+                    <p class="mb-0">Nuovo utente? <a href="{{ url_for('auth.register') }}">Registrati qui</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

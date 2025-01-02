@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="welcome">
+    <h1>Benvenuto nella Personal Dashboard</h1>
+    {% if current_user.is_authenticated %}
+        <p>Ciao {{ current_user.username }}!</p>
+        <p><a href="{{ url_for('main.dashboard') }}">Vai alla tua Dashboard</a></p>
+    {% else %}
+        <p>Per iniziare, effettua il <a href="{{ url_for('auth.login') }}">login</a> o <a href="{{ url_for('auth.register') }}">registrati</a>.</p>
+    {% endif %}
+</div>
+{% endblock %} 

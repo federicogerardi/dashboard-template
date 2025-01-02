@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - {{ current_user.username }}{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h1>Dashboard</h1>
+    <p>Benvenuto nella tua dashboard, {{ current_user.username }}!</p>
+    
+    <!-- Qui aggiungeremo i widget della dashboard -->
+    <div class="dashboard-content">
+        <p>Contenuto della dashboard in arrivo...</p>
+    </div>
+</div>
+{% endblock %}

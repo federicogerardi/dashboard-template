@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+
+{% block title %}Pannello Admin - {{ current_user.username }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Pannello di Amministrazione</h1>
+            
+            <!-- Statistiche -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Utenti Totali</h5>
+                            <p class="card-text display-6">{{ total_users }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Utenti Attivi</h5>
+                            <p class="card-text display-6">{{ active_users }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Nuovi Utenti (24h)</h5>
+                            <p class="card-text display-6">{{ new_users }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gestione Utenti -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">Gestione Utenti</h2>
+                    <button class="btn btn-primary btn-sm" onclick="showCreateModal()">
+                        <i class="fas fa-plus"></i> Nuovo Utente
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Ruolo</th>
+                                    <th>Data Registrazione</th>
+                                    <th>Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.role }}</td>
+                                    <td>{{ user.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="showEditModal({{ user.id }}, '{{ user.username }}', '{{ user.role }}')">
+                                                Modifica
+                                            </button>
+                                            {% if user.id != current_user.id %}
+                                            <button class="btn btn-outline-danger" onclick="deleteUser({{ user.id }}, '{{ user.username }}')">
+                                                Elimina
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal per modifica utente -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modifica Utente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm">
+                    <input type="hidden" id="userId">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ruolo</label>
+                        <select class="form-select" id="userRole">
+                            <option value="user">User</option>
+                            <option value="editor">Editor</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                <button type="button" class="btn btn-primary" onclick="updateUser()">Salva</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal per nuovo utente -->
+<div class="modal fade" id="createUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nuovo Utente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createUserForm">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" id="newUsername" required>
+                        <div class="invalid-feedback">Username già in uso</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="newEmail" required>
+                        <div class="invalid-feedback">Email non valida o già in uso</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" id="newPassword" required>
+                        <div class="form-text">Minimo 8 caratteri, almeno una lettera e un numero</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ruolo</label>
+                        <select class="form-select" id="newUserRole">
+                            <option value="user">User</option>
+                            <option value="editor">Editor</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                <button type="button" class="btn btn-primary" onclick="createUser()">Crea</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const editModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+
+function showEditModal(userId, username, currentRole) {
+    document.getElementById('userId').value = userId;
+    document.getElementById('username').value = username;
+    document.getElementById('userRole').value = currentRole;
+    editModal.show();
+}
+
+async function updateUser() {
+    const userId = document.getElementById('userId').value;
+    const role = document.getElementById('userRole').value;
+    
+    try {
+        const response = await fetch(`/admin/users/${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ role })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        alert('Errore durante l\'aggiornamento');
+    }
+}
+
+async function deleteUser(userId, username) {
+    if (!confirm(`Sei sicuro di voler eliminare l'utente ${username}?`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/admin/users/${userId}`, {
+            method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        alert('Errore durante l\'eliminazione');
+    }
+}
+
+const createModal = new bootstrap.Modal(document.getElementById('createUserModal'));
+
+function showCreateModal() {
+    document.getElementById('createUserForm').reset();
+    createModal.show();
+}
+
+async function createUser() {
+    const username = document.getElementById('newUsername').value;
+    const email = document.getElementById('newEmail').value;
+    const password = document.getElementById('newPassword').value;
+    const role = document.getElementById('newUserRole').value;
+    
+    try {
+        const response = await fetch('/admin/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                username,
+                email,
+                password,
+                role
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            createModal.hide();
+            location.reload();
+        } else {
+            // Gestione errori specifici
+            if (data.error === 'username_exists') {
+                document.getElementById('newUsername').classList.add('is-invalid');
+            } else if (data.error === 'email_exists') {
+                document.getElementById('newEmail').classList.add('is-invalid');
+            } else {
+                alert(data.message);
+            }
+        }
+    } catch (error) {
+        alert('Errore durante la creazione dell\'utente');
+    }
+}
+
+// Modifica gestione input username
+document.getElementById('newUsername').addEventListener('input', function() {
+    // Converti in minuscolo
+    this.value = this.value.toLowerCase();
+    
+    // Rimuovi caratteri non permessi (solo lettere minuscole, numeri e underscore)
+    this.value = this.value.replace(/[^a-z0-9_]/g, '');
+    
+    // Rimuovi classe invalid se presente
+    this.classList.remove('is-invalid');
+    
+    // Aggiorna feedback visivo
+    if (this.value.length < 3) {
+        this.classList.add('is-invalid');
+        this.nextElementSibling.textContent = 'Username deve essere almeno 3 caratteri';
+    } else {
+        this.classList.remove('is-invalid');
+    }
+});
+
+// Modifica modale di creazione per aggiungere helper text
+document.getElementById('newUsername').insertAdjacentHTML('afterend', 
+    '<div class="form-text">Solo lettere minuscole, numeri e underscore. Minimo 3 caratteri.</div>'
+);
+
+// Pulizia validazione al cambio input
+document.getElementById('newEmail').addEventListener('input', function() {
+    this.classList.remove('is-invalid');
+});
+</script>
+{% endblock %} 
