@@ -21,6 +21,7 @@ __pycache__/
 .idea/
 *.swp
 *.swo
+*.code-workspace
 
 # Logs
 *.log
