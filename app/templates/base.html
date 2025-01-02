@@ -73,6 +73,63 @@
             background-color: var(--bs-body-bg);
             border-bottom-color: var(--bs-border-color);
         }
+
+        /* Gestione colore icone nei button */
+        .btn-outline-primary:hover i {
+            color: var(--bs-white) !important;
+        }
+
+        .btn-outline-danger:hover i {
+            color: var(--bs-white) !important;
+        }
+
+        /* Specifica per dark mode */
+        [data-bs-theme="dark"] .btn-outline-primary:hover i {
+            color: var(--bs-white) !important;  /* Forza il colore bianco in hover */
+        }
+
+        /* Per i button outline in tema scuro */
+        [data-bs-theme="dark"] .btn-outline-primary {
+            --bs-btn-hover-color: var(--bs-white);
+            --bs-btn-active-color: var(--bs-white);
+        }
+
+        /* Per i button primari */
+        .btn-primary i {
+            color: var(--bs-white) !important;
+        }
+
+        /* Per i button nella navbar */
+        .navbar .btn i {
+            color: inherit !important;
+        }
+
+        /* Gestione hover nelle card della home */
+        .home-card:hover i {
+            transform: scale(1.1);
+            transition: transform 0.3s ease;
+        }
+
+        /* Transizione smooth per le icone */
+        .fas {
+            transition: color 0.2s ease;
+        }
+
+        /* Transizione smooth per le icone */
+        .btn i {
+            transition: color 0.2s ease;
+        }
+
+        /* Stile navbar per tema scuro */
+        [data-bs-theme="dark"] .navbar {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        /* Stile navbar per tema chiaro */
+        [data-bs-theme="light"] .navbar {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
     </style>
     {% block styles %}{% endblock %}
 </head>
