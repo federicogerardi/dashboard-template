@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Profilo - {{ current_user.username }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Impostazioni Profilo</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-user-circle fa-4x text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="mb-1">{{ current_user.username }}</h5>
+                            <p class="text-muted mb-0">{{ current_user.email }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6>Statistiche Account</h6>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Data registrazione
+                                <span>{{ current_user.created_at.strftime('%d/%m/%Y') }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Numero accessi
+                                <span>{{ current_user.login_count }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Ultimo accesso
+                                <span>{{ current_user.last_login.strftime('%d/%m/%Y %H:%M') if current_user.last_login }}</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6>Personalizzazione</h6>
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Tema</h6>
+                                        <small class="text-muted">Scegli tra tema chiaro e scuro</small>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="themeToggle" 
+                                               {% if current_user.theme_preference == 'dark' %}checked{% endif %}>
+                                        <label class="form-check-label" for="themeToggle">
+                                            Tema Scuro
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Torna alla Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('themeToggle').addEventListener('change', function() {
+    const newTheme = this.checked ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-bs-theme', newTheme);
+    fetch('/update_theme', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ theme: newTheme })
+    });
+});
+</script>
+{% endblock %} 
