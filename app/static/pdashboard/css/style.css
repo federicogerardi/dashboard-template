@@ -217,21 +217,6 @@ body {
     color: var(--bs-secondary);
 }
 
-/* Stile icone per adattarsi al tema */
-[data-bs-theme="light"] .fas,
-[data-bs-theme="light"] .fa-4x,
-[data-bs-theme="light"] .fa-3x,
-[data-bs-theme="light"] .fa-2x {
-    color: var(--bs-primary);
-}
-
-[data-bs-theme="dark"] .fas,
-[data-bs-theme="dark"] .fa-4x,
-[data-bs-theme="dark"] .fa-3x,
-[data-bs-theme="dark"] .fa-2x {
-    color: var(--bs-primary);
-}
-
 /* Timeline specifica per tema scuro */
 [data-bs-theme="dark"] .timeline-item {
     border-left-color: var(--bs-border-color);
@@ -276,7 +261,7 @@ body {
     --bs-breadcrumb-divider: '›';
 }
 
-/* Stili per la sidebar compatta */
+/* Sidebar container */
 .sidebar-card {
     font-size: 0.875rem;
 }
@@ -285,6 +270,7 @@ body {
     padding: 0.5rem 0.75rem;
 }
 
+/* Stili base per tutti gli elementi della lista */
 .list-group-item {
     border: none;
     padding: 0.5rem 0.75rem;
@@ -292,47 +278,84 @@ body {
     color: var(--bs-body-color);
 }
 
-.list-group-item i {
-    width: 1.25rem;
-    text-align: center;
-    font-size: 0.875rem;
-    color: inherit;
+/* Voci di primo livello */
+.list-group-item:not(.submenu .list-group-item),
+.nav-item-with-submenu .list-group-item {
+    display: flex;
+    align-items: center;
 }
 
-/* Hover stato normale */
-.list-group-item:not(.active):hover {
+/* Hover per voci di primo livello */
+.list-group-item:not(.submenu .list-group-item):hover,
+.nav-item-with-submenu .list-group-item:hover {
     background-color: rgba(var(--bs-primary-rgb), 0.1);
     color: var(--bs-primary);
 }
 
-/* Stato attivo */
-.list-group-item.active {
+/* Stato active per voci di primo livello */
+.list-group-item:not(.submenu .list-group-item).active,
+.nav-item-with-submenu .list-group-item.active {
+    background-color: var(--bs-primary) !important;
+    color: var(--bs-white) !important;
+}
+
+/* Submenu container */
+.submenu {
+    background-color: rgba(var(--bs-primary-rgb), 0.05);
+}
+
+/* Voci di secondo livello */
+.submenu .list-group-item {
+    padding-left: 2rem;
+}
+
+.submenu .list-group-item:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+.submenu .list-group-item.active {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    color: var(--bs-primary);
+    font-weight: 500;
+}
+
+/* Toggle button */
+.submenu-toggle {
+    padding: 0.5rem;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    transition: all 0.2s ease;
+    color: inherit;
+}
+
+.submenu-toggle:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+/* Toggle button quando il parent è attivo */
+.nav-item-with-submenu .list-group-item.active + .submenu-toggle {
     background-color: var(--bs-primary);
-    border-color: var(--bs-primary);
     color: var(--bs-white);
 }
 
-.list-group-item.active i {
-    color: var(--bs-white);
+/* Rotazione icona submenu */
+.submenu-icon {
+    transition: transform 0.3s ease;
 }
 
-/* Hover su elemento attivo */
-.list-group-item.active:hover {
-    background-color: var(--bs-primary);
-    color: var(--bs-white);
+[aria-expanded="true"] .submenu-icon {
+    transform: rotate(90deg);
 }
 
 /* Dark mode adjustments */
-[data-bs-theme="dark"] .list-group-item:not(.active) {
-    color: var(--bs-body-color);
+[data-bs-theme="dark"] .submenu {
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
-[data-bs-theme="dark"] .list-group-item:not(.active):hover {
-    background-color: rgba(var(--bs-primary-rgb), 0.2);
-    color: var(--bs-primary);
-}
-
-/* Responsive adjustments */
+/* Responsive */
 @media (max-width: 768px) {
     .sidebar-card {
         margin-bottom: 1rem;
@@ -341,13 +364,111 @@ body {
     .list-group-item {
         padding: 0.75rem;
     }
-    
-    .list-group-item i {
-        font-size: 1rem;
-    }
 }
 
 [data-bs-theme="dark"] .card {
     background-color: var(--bs-body-bg);
     border-color: var(--bs-border-color);
+}
+
+/* Stili per il submenu nella sidebar */
+.submenu {
+    background: rgba(var(--bs-primary-rgb), 0.05);
+}
+
+.submenu .list-group-item {
+    padding-left: 2rem;
+    border-left: 3px solid transparent;
+}
+
+.submenu .list-group-item:hover {
+    border-left-color: var(--bs-primary);
+}
+
+.submenu .list-group-item.active {
+    border-left-color: var(--bs-primary);
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+/* Rotazione icona submenu */
+.submenu-icon {
+    transition: transform 0.3s ease;
+}
+
+[aria-expanded="true"] .submenu-icon {
+    transform: rotate(90deg);
+}
+
+/* Dark mode adjustments */
+[data-bs-theme="dark"] .submenu {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Stili per i pulsanti del menu */
+.list-group-item[data-bs-toggle="collapse"] {
+    cursor: pointer;
+}
+
+.list-group-item[data-bs-toggle="collapse"]:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+/* Aggiungiamo regole specifiche per la sidebar */
+.sidebar-card .list-group-item i {
+    color: inherit !important;  /* Forza l'ereditarietà del colore */
+}
+
+.sidebar-card .list-group-item.active i {
+    color: inherit !important;  /* Assicura che le icone seguano il colore del testo quando attivo */
+}
+
+/* Manteniamo il colore primario solo per icone specifiche */
+.stats-card i,
+.card-header i:not(.submenu-icon),
+.breadcrumb-item i {
+    color: var(--bs-primary);
+}
+
+/* Contenitore per voce con submenu */
+.nav-item-with-submenu {
+    display: flex;
+    align-items: stretch;
+}
+
+.nav-item-with-submenu .list-group-item {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+    margin-right: 0;
+}
+
+/* Pulsante toggle submenu */
+.submenu-toggle {
+    padding: 0.5rem;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: inherit;
+    border: none;
+    min-width: 2.5rem;
+    transition: all 0.2s ease;
+}
+
+.submenu-toggle:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+.submenu-toggle:active {
+    background-color: rgba(var(--bs-primary-rgb), 0.15);
+}
+
+/* Dark mode adjustments */
+[data-bs-theme="dark"] .submenu-toggle {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-bs-theme="dark"] .submenu-toggle:hover {
+    border-color: rgba(255, 255, 255, 0.2);
 } 

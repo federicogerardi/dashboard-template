@@ -16,6 +16,7 @@ class DemoPlugin(DashboardExtension):
         from . import routes
         self.blueprint.add_url_rule('/', 'index', routes.index)
         self.blueprint.add_url_rule('/chart', 'chart', routes.chart)
+        self.blueprint.add_url_rule('/stats', 'stats', routes.stats)
     
     def get_navigation_items(self):
         return [
@@ -23,7 +24,14 @@ class DemoPlugin(DashboardExtension):
                 name='Demo Plugin',
                 icon='fas fa-flask',
                 url='/demo',
-                permission='user'
+                permission='user',
+                subitems=[
+                    NavigationItem(
+                        name='Statistiche',
+                        icon='fas fa-chart-line',
+                        url='/demo/stats'
+                    )
+                ]
             )
         ]
 

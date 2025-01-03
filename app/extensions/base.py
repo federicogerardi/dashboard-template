@@ -10,6 +10,13 @@ class NavigationItem:
     permission: str = None
     children: List['NavigationItem'] = None
 
+    def __init__(self, name, icon, url, permission=None, subitems=None):
+        self.name = name
+        self.icon = icon
+        self.url = url
+        self.permission = permission
+        self.subitems = subitems or []  # Se non specificato, lista vuota
+
 class DashboardExtension:
     """Classe base per le estensioni della dashboard"""
     
