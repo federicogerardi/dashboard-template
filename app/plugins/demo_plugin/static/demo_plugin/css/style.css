@@ -1,0 +1,12 @@
+/* Stili specifici del plugin */
+.demo-plugin-card {
+    transition: transform 0.2s ease;
+}
+
+.demo-plugin-card:hover {
+    transform: translateY(-5px);
+}
+
+#demoChart {
+    min-height: 300px;
+} 

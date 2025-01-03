@@ -1,0 +1,105 @@
+{% extends "pdashboard/base.html" %}
+
+{% block title %}Demo Plugin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Demo Plugin Dashboard</h1>
+        <button class="btn btn-primary" id="refreshChart">
+            <i class="fas fa-sync-alt"></i> Aggiorna
+        </button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Valore 1</h5>
+                    <p class="display-6">{{ stats.value1 }}</p>
+                    <small class="text-muted">
+                        <i class="fas fa-arrow-up text-success"></i> +15% rispetto a ieri
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Valore 2</h5>
+                    <p class="display-6">{{ stats.value2 }}</p>
+                    <small class="text-muted">
+                        <i class="fas fa-arrow-down text-danger"></i> -5% rispetto a ieri
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Valore 3</h5>
+                    <p class="display-6">{{ stats.value3 }}</p>
+                    <small class="text-muted">
+                        <i class="fas fa-equals text-warning"></i> Nessuna variazione
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Grafico Demo</h5>
+            <canvas id="demoChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let demoChart;
+
+async function updateChart() {
+    try {
+        const response = await fetch('/demo/chart');
+        const data = await response.json();
+        
+        if (!demoChart) {
+            const ctx = document.getElementById('demoChart').getContext('2d');
+            demoChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Dati Demo',
+                        data: data.values,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+        } else {
+            demoChart.data.datasets[0].data = data.values;
+            demoChart.update();
+        }
+    } catch (error) {
+        console.error('Errore nel caricamento dei dati:', error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', updateChart);
+document.getElementById('refreshChart').addEventListener('click', updateChart);
+</script>
+{% endblock %} 

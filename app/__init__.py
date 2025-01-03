@@ -1,15 +1,16 @@
-from flask import Flask
+from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_wtf.csrf import CSRFProtect
 from sqlalchemy import inspect
 from app.config import config
-from app.utils.errors import register_error_handlers
-from app.utils.logger import setup_logger
-from app.utils.limiter import init_limiter, limiter
+from app.core.utils.errors import register_error_handlers
+from app.core.utils.logger import setup_logger
+from app.core.utils.limiter import init_limiter, limiter
 import os
 from dotenv import load_dotenv
+from app.plugins import init_plugins, discover_plugins
 
 # Ottieni il percorso assoluto della directory dell'app
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -28,69 +29,83 @@ def create_app(config_name=None):
     """Factory pattern per la creazione dell'app"""
     app = Flask(__name__)
     
+    # Configurazione
     if config_name is None:
         config_name = os.getenv('APP_ENV', 'development')
     
-    print(f"\nPrima di from_object:")
+    print("\nPrima di from_object:")
     print(f"config_name: {config_name}")
     print(f"DATABASE_URL: {os.getenv('DATABASE_URL')}")
     
-    # Crea un'istanza della configurazione
-    app_config = config[config_name]()
-    app.config.from_object(app_config)
+    app.config.from_object(config[config_name])
     
-    print(f"\nDopo from_object:")
-    print(f"SQLALCHEMY_DATABASE_URI: {app.config.get('SQLALCHEMY_DATABASE_URI')}")
+    print("\nDopo from_object:")
+    print(f"SQLALCHEMY_DATABASE_URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
     
-    # Debug della configurazione
     app.logger.info(f"Configurazione caricata: {config_name}")
     app.logger.info(f"Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
     
-    # Inizializzazione delle estensioni
+    # Inizializzazione delle estensioni con l'app
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
     csrf.init_app(app)
+    init_limiter(app)
     
     # Configurazione login
-    @login_manager.user_loader
-    def load_user(user_id):
-        from app.models.user import User
-        return User.query.get(int(user_id))
-    
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Effettua il login per accedere a questa pagina.'
     login_manager.login_message_category = 'warning'
     
-    # Setup sicurezza e logging
-    setup_logger(app)
-    register_error_handlers(app)
-    init_limiter(app)
+    @login_manager.user_loader
+    def load_user(id):
+        from app.core.models.user import User  # Updated import
+        return User.query.get(int(id))
     
     with app.app_context():
-        # Importa qui i modelli per assicurarti che siano caricati
-        from app.models.user import User
-        
         # Registrazione dei blueprint
-        from app.controllers.routes import main
-        from app.controllers.auth import auth
+        from app.core.controllers.routes import main  # Updated import
+        from app.core.controllers.auth import auth    # Updated import
         
         app.register_blueprint(main)
         app.register_blueprint(auth)
         
-        # Verifica se le tabelle sono state create
+        # Registrazione gestione errori
+        register_error_handlers(app)
+        
+        # Setup logger
+        setup_logger(app)
+        
+        # Verifica esistenza database
+        if not os.path.exists(os.path.join(basedir, 'instance')):
+            os.makedirs(os.path.join(basedir, 'instance'))
+        
+        # Inizializzazione database
         inspector = inspect(db.engine)
-        tables = inspector.get_table_names()
+        if not inspector.has_table("user"):
+            app.logger.info("Inizializzazione database...")
+            db.create_all()
+            from app.core.models.user import User, UserRole  # Updated import
+            # Crea utente admin se non esiste
+            if not User.query.filter_by(username='admin').first():
+                admin = User(username='admin', email='admin@example.com', role=UserRole.ADMIN)
+                admin.set_password('admin')
+                db.session.add(admin)
+                db.session.commit()
+                app.logger.info("Database inizializzato con successo!")
         
-        if 'user' not in tables:
-            app.logger.warning("La tabella 'user' non esiste - verrà creata dalle migrazioni")
-        else:
-            app.logger.info("Database inizializzato con successo!")
-            
-        # Registra funzioni di utilità nei template
-        register_template_utils(app)
+        # Inizializza i plugin e rendili disponibili nel contesto dell'app
+        app.plugins = discover_plugins()
+        init_plugins(app)
         
-        return app
+        # Aggiungi current_app ai template globals
+        @app.context_processor
+        def inject_plugins():
+            return {
+                'plugins': current_app.plugins
+            }
+    
+    return app
 
 def register_template_utils(app):
     """Registra funzioni di utilità per i template"""

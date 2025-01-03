@@ -1,14 +1,13 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
-from app.models.user import User
-from app.forms import LoginForm, RegistrationForm
+from app.core.models.user import User, UserRole
+from app.core.forms import LoginForm, RegistrationForm
 from app import db
 from urllib.parse import urlparse
-from app.models.user import UserRole
 from datetime import datetime, timedelta, timezone
-from app.utils.limiter import limiter
-from app.utils.logger import log_security_event
-from app.utils.security import sanitize_input
+from app.core.utils.limiter import limiter
+from app.core.utils.logger import log_security_event
+from app.core.utils.security import sanitize_input
 
 auth = Blueprint('auth', __name__)
 

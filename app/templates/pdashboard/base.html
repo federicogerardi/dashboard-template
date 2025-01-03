@@ -9,6 +9,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='pdashboard/css/style.css') }}">
     <style>
         /* Stile icone per adattarsi al tema */
         [data-bs-theme="light"] .fas,
@@ -32,35 +33,6 @@
 
         [data-bs-theme="dark"] .timeline-item i {
             background-color: var(--bs-body-bg);
-        }
-
-        /* Switch tema */
-        .theme-switch {
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 50%;
-            width: 38px;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 1rem;
-            border: none;
-            background: transparent;
-        }
-        
-        .theme-switch:hover {
-            background-color: rgba(var(--bs-primary-rgb), 0.1);
-        }
-        
-        /* Animazione switch tema */
-        .theme-switch i {
-            transition: transform 0.3s ease;
-            color: var(--bs-primary);
-        }
-        
-        .theme-switch:hover i {
-            transform: rotate(30deg);
         }
 
         /* Stili generali per le card */
@@ -152,10 +124,33 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a>
                         </li>
-                        {% if current_user.is_admin() %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.admin_panel') }}">Admin</a>
+                        
+                        <!-- Menu Plugins con dropdown -->
+                        {% if plugins %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Plugin
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                {% for plugin in plugins %}
+                                    {% for nav_item in plugin.get_navigation_items() %}
+                                        {% if not nav_item.permission or current_user.has_role(nav_item.permission) %}
+                                            <li>
+                                                <a class="dropdown-item" href="{{ nav_item.url }}">
+                                                    {{ nav_item.name }}
+                                                </a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
                         </li>
+                        {% endif %}
+
+                        {% if current_user.is_admin() %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('main.admin_panel') }}">Admin</a>
+                            </li>
                         {% endif %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>

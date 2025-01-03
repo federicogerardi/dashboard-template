@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 
 basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+instance_path = os.path.join(basedir, 'instance')
 
 class BaseConfig:
     """Configurazione base comune a tutti gli ambienti"""
@@ -11,6 +12,8 @@ class BaseConfig:
         'pool_pre_ping': True,
         'pool_recycle': 300
     }
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'sqlite:///' + os.path.join(instance_path, 'app.db')
 
 class DevelopmentConfig(BaseConfig):
     """Configurazione per sviluppo"""
@@ -20,9 +23,8 @@ class DevelopmentConfig(BaseConfig):
 
     def __init__(self):
         super().__init__()
-        # Usa DATABASE_URL se impostato, altrimenti usa SQLite
         self.SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-            'sqlite:///' + os.path.join(basedir, 'instance', 'dev.db')
+            'sqlite:///' + os.path.join(instance_path, 'dev.db')
 
 class TestingConfig(BaseConfig):
     """Configurazione per testing"""
@@ -32,9 +34,8 @@ class TestingConfig(BaseConfig):
 
     def __init__(self):
         super().__init__()
-        # Usa DATABASE_URL se impostato, altrimenti usa SQLite per i test
         self.SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-            'sqlite:///' + os.path.join(basedir, 'instance', 'test.db')
+            'sqlite:///' + os.path.join(instance_path, 'test.db')
 
 class ProductionConfig(BaseConfig):
     """Configurazione per produzione"""

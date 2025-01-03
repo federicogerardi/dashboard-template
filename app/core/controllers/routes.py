@@ -1,20 +1,24 @@
 from flask import Blueprint, render_template, request, jsonify, current_app
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta
-from app.models.user import User, UserRole
-from app.utils.decorators import role_required
-from app.utils.security import sanitize_input, validate_json_request, validate_username
+from app.core.models.user import User, UserRole
+from app.core.utils.decorators import role_required
+from app.core.utils.security import (
+    sanitize_input, 
+    validate_json_request, 
+    validate_username
+)
 from app import db
 from werkzeug.security import generate_password_hash
 import os
-from app.forms import RegistrationForm  # Importa il form di registrazione
+from app.core.forms import RegistrationForm
 
-# Creazione del blueprint
-main = Blueprint('main', __name__)
+# Creazione del blueprint con il nuovo namespace
+main = Blueprint('main', __name__, url_prefix='')
 
 @main.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('pdashboard/index.html')
 
 @main.route('/dashboard')
 @login_required
@@ -43,7 +47,7 @@ def dashboard():
         }
     ]
     
-    return render_template('dashboard.html',
+    return render_template('pdashboard/dashboard.html',
                          user_stats=user_stats,
                          recent_activities=recent_activities)
 
@@ -73,7 +77,7 @@ def admin_panel():
     database_url = current_app.config['SQLALCHEMY_DATABASE_URI']
     app_env = os.getenv('APP_ENV', 'development')  # Usa APP_ENV dal .env
     
-    return render_template('admin.html',
+    return render_template('pdashboard/admin.html',
                          users=users,
                          total_users=total_users,
                          active_users=active_users,
@@ -85,7 +89,7 @@ def admin_panel():
 @login_required
 @role_required('editor')
 def editor_panel():
-    return render_template('editor.html')
+    return render_template('pdashboard/editor.html')
 
 @main.route('/admin/users/<int:user_id>', methods=['PUT'])
 @login_required
@@ -185,7 +189,7 @@ def create_user():
 @login_required
 def profile():
     current_app.logger.info(f"Accesso al profilo utente: {current_user.username}")
-    return render_template('profile.html', user=current_user)
+    return render_template('pdashboard/profile.html', user=current_user)
 
 @main.route('/update_theme', methods=['POST'])
 @login_required

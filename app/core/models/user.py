@@ -41,3 +41,9 @@ class User(UserMixin, db.Model):
     
     def __repr__(self):
         return f'<User {self.username}>'
+
+    def has_role(self, role):
+        """Verifica se l'utente ha un determinato ruolo"""
+        if role == 'user':
+            return True  # Tutti gli utenti autenticati hanno il ruolo 'user'
+        return self.role == role

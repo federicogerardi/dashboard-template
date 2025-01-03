@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "pdashboard/base.html" %}
 
 {% block title %}Pannello Admin - {{ current_user.username }}{% endblock %}
 
@@ -87,7 +87,7 @@
 
             <!-- System Info -->
             <div class="card mb-4">
-                <div class="card-header bg-light">
+                <div class="card-header">
                     <small class="text-muted">
                         <i class="fas fa-info-circle me-2 text-secondary"></i>
                         {% if 'sqlite' in database_url %}
