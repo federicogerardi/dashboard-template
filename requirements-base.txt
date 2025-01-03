@@ -19,3 +19,7 @@ pytest-cov==4.1.0
 
 # Database
 psycopg[binary]>=3.1.18 
+
+# Varie
+pytest==8.0.0
+pytest-cov==4.1.0

@@ -37,7 +37,7 @@ def create_app(config_name=None):
     print(f"config_name: {config_name}")
     print(f"DATABASE_URL: {os.getenv('DATABASE_URL')}")
     
-    app.config.from_object(config[config_name])
+    app.config.from_object(config[config_name]())
     
     print("\nDopo from_object:")
     print(f"SQLALCHEMY_DATABASE_URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
@@ -59,7 +59,7 @@ def create_app(config_name=None):
     
     @login_manager.user_loader
     def load_user(id):
-        from app.core.models.user import User  # Updated import
+        from app.core.models.user import User
         return User.query.get(int(id))
     
     with app.app_context():
@@ -88,7 +88,11 @@ def create_app(config_name=None):
             from app.core.models.user import User, UserRole  # Updated import
             # Crea utente admin se non esiste
             if not User.query.filter_by(username='admin').first():
-                admin = User(username='admin', email='admin@example.com', role=UserRole.ADMIN)
+                admin = User(
+                    username='admin', 
+                    email='admin@example.com', 
+                    role=UserRole.ADMIN.value
+                )
                 admin.set_password('admin')
                 db.session.add(admin)
                 db.session.commit()

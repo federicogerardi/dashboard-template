@@ -8,7 +8,7 @@ class LoginForm(FlaskForm):
     """Form per il login"""
     username = StringField('Username', validators=[
         DataRequired(message="Username obbligatorio"),
-        Length(min=3, max=64, message="Username non valido")
+        Length(min=3, max=64, message="Username deve essere tra 3 e 64 caratteri")
     ])
     password = PasswordField('Password', validators=[
         DataRequired(message="Password obbligatoria")
@@ -16,11 +16,9 @@ class LoginForm(FlaskForm):
     remember_me = BooleanField('Ricordami')
     submit = SubmitField('Login')
 
-    def validate_username(self, username):
-        """Validazione aggiuntiva username"""
-        if not username.data.isalnum():
-            raise ValidationError('Username può contenere solo lettere e numeri')
-        username.data = username.data.lower()
+    def validate_username(self, field):
+        # Normalizza l'username (rimuovi spazi e converti in minuscolo)
+        field.data = field.data.strip().lower()
 
 class RegistrationForm(FlaskForm):
     """Form per la registrazione"""

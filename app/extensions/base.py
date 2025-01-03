@@ -25,6 +25,7 @@ class DashboardExtension:
         self.blueprint = None
         self.index_priority = 0  # Priorità default per l'index
         self.provides_index = False  # Flag per indicare se fornisce un index
+        self.is_active = True  # Nuovo attributo per lo stato
     
     def init_app(self, app):
         """Inizializza l'estensione con l'app Flask"""
@@ -49,3 +50,8 @@ class DashboardExtension:
     def get_index_context(self) -> dict:
         """Restituisce il contesto da passare al template dell'index"""
         return {} 
+    
+    def toggle_status(self):
+        """Attiva/disattiva il plugin"""
+        self.is_active = not self.is_active
+        return self.is_active 

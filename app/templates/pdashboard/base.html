@@ -78,7 +78,7 @@
     <!-- Container principale con sidebar -->
     <div class="container {% if not current_user.is_authenticated or request.endpoint == 'main.index' %}mt-4{% endif %}">
         <div class="row">
-            {% if current_user.is_authenticated and plugins and not request.endpoint == 'main.index' %}
+            {% if current_user.is_authenticated and plugins|selectattr('is_active')|list and not request.endpoint == 'main.index' %}
             <!-- Sidebar più compatta -->
             <div class="col-md-2 mb-4">
                 <div class="card sidebar-card">
@@ -90,51 +90,53 @@
                     </div>
                     <div class="list-group list-group-flush">
                         {% for plugin in plugins %}
-                            {% for nav_item in plugin.get_navigation_items() %}
-                                {% if not nav_item.permission or current_user.has_role(nav_item.permission) %}
-                                    <div class="nav-item-group">
-                                        {% if nav_item.subitems %}
-                                            <!-- Voce con sottomenu: contenitore flex -->
-                                            <div class="nav-item-with-submenu">
+                            {% if plugin.is_active %}
+                                {% for nav_item in plugin.get_navigation_items() %}
+                                    {% if not nav_item.permission or current_user.has_role(nav_item.permission) %}
+                                        <div class="nav-item-group">
+                                            {% if nav_item.subitems %}
+                                                <!-- Voce con sottomenu: contenitore flex -->
+                                                <div class="nav-item-with-submenu">
+                                                    <a href="{{ nav_item.url }}" 
+                                                       class="list-group-item list-group-item-action flex-grow-1">
+                                                        <div class="d-flex align-items-center">
+                                                            <i class="{{ nav_item.icon }} me-2"></i>
+                                                            <span class="small">{{ nav_item.name }}</span>
+                                                        </div>
+                                                    </a>
+                                                    <button type="button"
+                                                            class="submenu-toggle btn btn-link text-decoration-none shadow-none"
+                                                            data-bs-toggle="collapse" 
+                                                            data-bs-target="#submenu-{{ loop.index }}"
+                                                            aria-expanded="{{ 'true' if request.path.startswith(nav_item.url) else 'false' }}">
+                                                        <i class="fas fa-chevron-right submenu-icon {% if request.path.startswith(nav_item.url) %}rotate-90{% endif %}"></i>
+                                                    </button>
+                                                </div>
+                                                <!-- Sottomenu -->
+                                                <div class="collapse submenu {{ 'show' if request.path.startswith(nav_item.url) }}" 
+                                                     id="submenu-{{ loop.index }}">
+                                                    {% for subitem in nav_item.subitems %}
+                                                        <a href="{{ subitem.url }}" 
+                                                           class="list-group-item list-group-item-action d-flex align-items-center ps-4 {% if request.path == subitem.url %}active{% endif %}">
+                                                            <i class="{{ subitem.icon }} me-2 small"></i>
+                                                            <span class="small">{{ subitem.name }}</span>
+                                                        </a>
+                                                    {% endfor %}
+                                                </div>
+                                            {% else %}
+                                                <!-- Voce senza sottomenu: link diretto -->
                                                 <a href="{{ nav_item.url }}" 
-                                                   class="list-group-item list-group-item-action flex-grow-1">
-                                                    <div class="d-flex align-items-center">
+                                                   class="list-group-item list-group-item-action d-flex align-items-center {% if request.path.rstrip('/') == nav_item.url.rstrip('/') %}active{% endif %}">
+                                                    <div>
                                                         <i class="{{ nav_item.icon }} me-2"></i>
                                                         <span class="small">{{ nav_item.name }}</span>
                                                     </div>
                                                 </a>
-                                                <button type="button"
-                                                        class="submenu-toggle btn btn-link text-decoration-none shadow-none"
-                                                        data-bs-toggle="collapse" 
-                                                        data-bs-target="#submenu-{{ loop.index }}"
-                                                        aria-expanded="{{ 'true' if request.path.startswith(nav_item.url) else 'false' }}">
-                                                    <i class="fas fa-chevron-right submenu-icon {% if request.path.startswith(nav_item.url) %}rotate-90{% endif %}"></i>
-                                                </button>
-                                            </div>
-                                            <!-- Sottomenu -->
-                                            <div class="collapse submenu {{ 'show' if request.path.startswith(nav_item.url) }}" 
-                                                 id="submenu-{{ loop.index }}">
-                                                {% for subitem in nav_item.subitems %}
-                                                    <a href="{{ subitem.url }}" 
-                                                       class="list-group-item list-group-item-action d-flex align-items-center ps-4 {% if request.path == subitem.url %}active{% endif %}">
-                                                        <i class="{{ subitem.icon }} me-2 small"></i>
-                                                        <span class="small">{{ subitem.name }}</span>
-                                                    </a>
-                                                {% endfor %}
-                                            </div>
-                                        {% else %}
-                                            <!-- Voce senza sottomenu: link diretto -->
-                                            <a href="{{ nav_item.url }}" 
-                                               class="list-group-item list-group-item-action d-flex align-items-center {% if request.path.rstrip('/') == nav_item.url.rstrip('/') %}active{% endif %}">
-                                                <div>
-                                                    <i class="{{ nav_item.icon }} me-2"></i>
-                                                    <span class="small">{{ nav_item.name }}</span>
-                                                </div>
-                                            </a>
-                                        {% endif %}
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
                         {% endfor %}
                     </div>
                 </div>

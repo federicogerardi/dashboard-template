@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from app.core.utils.limiter import limiter
 from app.core.utils.logger import log_security_event
 from app.core.utils.security import sanitize_input
+from sqlalchemy.exc import SQLAlchemyError
 
 auth = Blueprint('auth', __name__)
 
@@ -19,19 +20,46 @@ def login():
     
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data.lower()).first()
+        # Debug: stampa i dati ricevuti
+        print(f"Login attempt - username: {form.username.data}")
+        
+        # Cerca l'utente (case insensitive)
+        user = User.query.filter(
+            User.username.ilike(form.username.data.strip())
+        ).first()
+        
+        # Debug: verifica se l'utente è stato trovato
+        print(f"User found: {user}")
+        
         if user and user.check_password(form.password.data):
-            # Incrementiamo il contatore qui, al login effettivo
-            user.login_count += 1
+            # Login riuscito
+            login_user(user, remember=form.remember_me.data)
+            
+            # Aggiorna statistiche login
+            user.login_count = (user.login_count or 0) + 1
             user.last_login = datetime.utcnow()
             db.session.commit()
             
-            login_user(user, remember=form.remember_me.data)
+            flash('Login effettuato con successo!', 'success')
+            
+            # Gestione redirect
             next_page = request.args.get('next')
-            if not next_page or url_parse(next_page).netloc != '':
+            if not next_page or urlparse(next_page).netloc != '':
                 next_page = url_for('main.dashboard')
             return redirect(next_page)
-        flash('Username o password non validi', 'error')
+        else:
+            # Debug: stampa il motivo del fallimento
+            if not user:
+                print("Login failed: user not found")
+            else:
+                print("Login failed: wrong password")
+            
+            flash('Username o password non validi', 'error')
+    
+    # Debug: stampa eventuali errori del form
+    if form.errors:
+        print(f"Form errors: {form.errors}")
+    
     return render_template('pdashboard/auth/login.html', form=form)
 
 @auth.route('/logout')
@@ -66,12 +94,14 @@ def register():
         current_app.logger.info(f"Tentativo registrazione per username: {username}")
         
         is_first_user = User.query.first() is None
+        current_app.logger.info(f"Is first user? {is_first_user}")
         
         user = User(
             username=username,
             email=email,
             role=UserRole.ADMIN.value if is_first_user else UserRole.USER.value
         )
+        current_app.logger.info(f"User role set to: {user.role}")
         user.set_password(form.password.data)
         
         try:
@@ -80,10 +110,10 @@ def register():
             current_app.logger.info(f"Utente {user.username} registrato con successo")
             flash('Registrazione completata con successo!')
             return redirect(url_for('auth.login'))
-        except Exception as e:
-            current_app.logger.error(f"Errore durante la registrazione: {str(e)}")
+        except SQLAlchemyError as e:
+            current_app.logger.error(f"Database error: {str(e)}")
             db.session.rollback()
-            flash('Errore durante la registrazione. Riprova più tardi.', 'error')
+            flash('Errore del database. Riprova più tardi.', 'error')
     
     return render_template('pdashboard/auth/register.html', form=form)
 

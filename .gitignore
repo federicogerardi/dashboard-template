@@ -64,3 +64,9 @@ backups/*
 !backups/.gitkeep
 !backups/sqlite/.gitkeep
 !backups/postgres/.gitkeep
+
+# Test files
+tests/
+*.pytest_cache
+.coverage
+htmlcov/

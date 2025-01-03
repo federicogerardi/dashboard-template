@@ -12,6 +12,7 @@ from app import db
 from werkzeug.security import generate_password_hash
 import os
 from app.core.forms import RegistrationForm
+from app.core.utils.plugin_manager import save_plugin_status
 
 # Creazione del blueprint con il nuovo namespace
 main = Blueprint('main', __name__, url_prefix='')
@@ -241,3 +242,34 @@ def debug_config():
         'SQLALCHEMY_DATABASE_URI': current_app.config['SQLALCHEMY_DATABASE_URI']
     }
     return jsonify(config_info)
+
+@main.route('/admin/plugins/<plugin_name>/toggle', methods=['POST'])
+@login_required
+@role_required('admin')
+def toggle_plugin(plugin_name):
+    try:
+        plugin = next((p for p in current_app.plugins if p.name == plugin_name), None)
+        
+        if not plugin:
+            return jsonify({
+                'status': 'error',
+                'message': f'Plugin {plugin_name} non trovato'
+            }), 404
+            
+        new_status = plugin.toggle_status()
+        
+        # Salva lo stato
+        save_plugin_status(plugin_name, new_status)
+        
+        return jsonify({
+            'status': 'success',
+            'message': f"Plugin {plugin_name} {'attivato' if new_status else 'disattivato'} con successo",
+            'is_active': new_status
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Errore nel toggle plugin: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500

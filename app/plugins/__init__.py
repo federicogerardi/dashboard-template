@@ -3,6 +3,7 @@ from pathlib import Path
 from flask import Blueprint
 from typing import List, Dict
 from app.extensions.base import DashboardExtension
+from app.core.utils.plugin_manager import load_plugin_status
 
 def discover_plugins() -> List[DashboardExtension]:
     """Scopre automaticamente i plugin installati"""
@@ -24,10 +25,18 @@ def discover_plugins() -> List[DashboardExtension]:
 def init_plugins(app):
     """Inizializza tutti i plugin trovati"""
     plugins = discover_plugins()
+    plugin_status = load_plugin_status()
     
     for plugin in plugins:
         try:
-            plugin.init_app(app)
-            app.logger.info(f"Plugin {plugin.name} inizializzato con successo")
+            # Carica lo stato salvato o usa il default (True)
+            plugin.is_active = plugin_status.get(plugin.name, True)
+            
+            if plugin.is_active:
+                plugin.init_app(app)
+                app.logger.info(f"Plugin {plugin.name} inizializzato con successo")
+            else:
+                app.logger.info(f"Plugin {plugin.name} disattivato")
+                
         except Exception as e:
             app.logger.error(f"Errore nell'inizializzazione del plugin {plugin.name}: {e}")

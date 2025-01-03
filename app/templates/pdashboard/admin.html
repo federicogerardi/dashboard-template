@@ -85,26 +85,25 @@
                                                 <th>Nome Plugin</th>
                                                 <th>URL Prefix</th>
                                                 <th>Stato</th>
-                                                <th>Permessi</th>
+                                                <th>Azioni</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {% for plugin in plugins %}
                                             <tr>
+                                                <td>{{ plugin.name }}</td>
+                                                <td>{{ plugin.blueprint.url_prefix if plugin.blueprint else 'N/A' }}</td>
                                                 <td>
-                                                    <i class="fas fa-plug me-2 text-primary"></i>
-                                                    {{ plugin.name }}
+                                                    <span class="badge bg-{{ 'success' if plugin.is_active else 'danger' }}">
+                                                        {{ 'Attivo' if plugin.is_active else 'Disattivo' }}
+                                                    </span>
                                                 </td>
                                                 <td>
-                                                    <code>{{ plugin.blueprint.url_prefix }}</code>
-                                                </td>
-                                                <td>
-                                                    <span class="badge bg-success">Attivo</span>
-                                                </td>
-                                                <td>
-                                                    {% for nav_item in plugin.get_navigation_items() %}
-                                                        <span class="badge bg-secondary">{{ nav_item.permission }}</span>
-                                                    {% endfor %}
+                                                    <button 
+                                                        class="btn btn-sm btn-{{ 'danger' if plugin.is_active else 'success' }}"
+                                                        onclick="togglePlugin('{{ plugin.name }}')">
+                                                        {{ 'Disattiva' if plugin.is_active else 'Attiva' }}
+                                                    </button>
                                                 </td>
                                             </tr>
                                             {% endfor %}
@@ -415,5 +414,29 @@ document.getElementById('newUsername').insertAdjacentHTML('afterend',
 document.getElementById('newEmail').addEventListener('input', function() {
     this.classList.remove('is-invalid');
 });
+
+async function togglePlugin(pluginName) {
+    try {
+        const response = await fetch(`/admin/plugins/${pluginName}/toggle`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token() }}',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            alert(data.message || 'Stato del plugin aggiornato con successo');
+            location.reload();
+        } else {
+            throw new Error(data.message || 'Errore durante la modifica dello stato');
+        }
+    } catch (error) {
+        console.error('Errore:', error);
+        alert('Errore durante la modifica dello stato: ' + error.message);
+    }
+}
 </script>
 {% endblock %} 

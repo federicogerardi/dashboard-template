@@ -9,6 +9,8 @@ class BaseConfig:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-key-molto-segreta'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_size': 10,
+        'max_overflow': 20,
         'pool_pre_ping': True,
         'pool_recycle': 300
     }
