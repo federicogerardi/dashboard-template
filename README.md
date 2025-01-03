@@ -76,10 +76,9 @@ Un esempio di plugin è fornito nella directory `plugins/demo_plugin/`, che incl
 
 ## 🛠️ Installazione
 
-1. Clona il repository:  
+1. Aggiungi il mio repository come origine remota:  
 ```  
-git clone https://github.com/federicogerardi/dashboard-template.git  
-cd <repository-directory>  
+git remote add upstream https://github.com/federicogerardi/dashboard-template.git  
 ```
 2. Installa le dipendenze:  
 ```  
