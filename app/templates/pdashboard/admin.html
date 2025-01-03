@@ -84,8 +84,8 @@
                                             <tr>
                                                 <th>Nome Plugin</th>
                                                 <th>URL Prefix</th>
-                                                <th>Stato</th>
-                                                <th>Azioni</th>
+                                                <th class="text-center">Stato</th>
+                                                <th class="text-center">Azioni</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -93,16 +93,20 @@
                                             <tr>
                                                 <td>{{ plugin.name }}</td>
                                                 <td>{{ plugin.blueprint.url_prefix if plugin.blueprint else 'N/A' }}</td>
-                                                <td>
-                                                    <span class="badge bg-{{ 'success' if plugin.is_active else 'danger' }}">
+                                                <td class="text-center">
+                                                    <span class="badge rounded-pill bg-{{ 'success' if plugin.is_active else 'secondary' }}">
+                                                        <i class="fas fa-{{ 'check' if plugin.is_active else 'times' }} me-1"></i>
                                                         {{ 'Attivo' if plugin.is_active else 'Disattivo' }}
                                                     </span>
                                                 </td>
-                                                <td>
+                                                <td class="text-center">
                                                     <button 
-                                                        class="btn btn-sm btn-{{ 'danger' if plugin.is_active else 'success' }}"
-                                                        onclick="togglePlugin('{{ plugin.name }}')">
-                                                        {{ 'Disattiva' if plugin.is_active else 'Attiva' }}
+                                                        class="btn btn-sm {{ 'btn-danger' if plugin.is_active else 'btn-success' }}"
+                                                        onclick="togglePlugin('{{ plugin.name }}')"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-placement="top"
+                                                        data-bs-title="{{ 'Disattiva plugin' if plugin.is_active else 'Attiva plugin' }}">
+                                                        <i class="fas fa-power-off"></i>
                                                     </button>
                                                 </td>
                                             </tr>
@@ -415,6 +419,10 @@ document.getElementById('newEmail').addEventListener('input', function() {
     this.classList.remove('is-invalid');
 });
 
+// Inizializza tutti i tooltip
+const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
 async function togglePlugin(pluginName) {
     try {
         const response = await fetch(`/admin/plugins/${pluginName}/toggle`, {
@@ -428,14 +436,20 @@ async function togglePlugin(pluginName) {
         const data = await response.json();
         
         if (response.ok) {
-            alert(data.message || 'Stato del plugin aggiornato con successo');
-            location.reload();
+            if (data.requiresRestart) {
+                alert(data.message);
+                location.reload(); // Ricarica solo la pagina per mostrare il nuovo stato
+            } else {
+                location.reload();
+            }
         } else {
             throw new Error(data.message || 'Errore durante la modifica dello stato');
         }
     } catch (error) {
         console.error('Errore:', error);
-        alert('Errore durante la modifica dello stato: ' + error.message);
+        alert('Errore: ' + error.message);
+    } finally {
+        tooltipList.forEach(tooltip => tooltip.hide());
     }
 }
 </script>

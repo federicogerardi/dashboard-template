@@ -1,44 +1,23 @@
 import json
 import os
-from flask import current_app
+from pathlib import Path
 
-def save_plugin_status(plugin_name: str, status: bool):
-    """Salva lo stato del plugin in un file JSON"""
-    config_file = os.path.join(current_app.instance_path, 'plugin_status.json')
-    
-    # Assicurati che la directory instance esista
-    os.makedirs(current_app.instance_path, exist_ok=True)
-    
-    try:
-        # Leggi la configurazione esistente o crea un nuovo dict
-        config = {}
-        if os.path.exists(config_file):
-            with open(config_file, 'r') as f:
-                config = json.load(f)
-        
-        # Aggiorna lo stato del plugin
-        config[plugin_name] = status
-        
-        # Salva la configurazione aggiornata
-        with open(config_file, 'w') as f:
-            json.dump(config, f, indent=4)
-            
-        current_app.logger.info(f"Stato del plugin {plugin_name} salvato con successo")
-        
-    except Exception as e:
-        current_app.logger.error(f"Errore nel salvataggio stato plugin: {e}")
-        raise
+def get_plugin_status_file():
+    """Restituisce il percorso del file di stato dei plugin"""
+    config_dir = Path('instance')
+    config_dir.mkdir(exist_ok=True)
+    return config_dir / 'plugin_status.json'
 
 def load_plugin_status():
-    """Carica gli stati dei plugin dal file JSON"""
-    config_file = os.path.join(current_app.instance_path, 'plugin_status.json')
-    
-    if not os.path.exists(config_file):
-        return {}
-        
-    try:
-        with open(config_file, 'r') as f:
+    """Carica lo stato dei plugin dal file di configurazione"""
+    status_file = get_plugin_status_file()
+    if status_file.exists():
+        with open(status_file) as f:
             return json.load(f)
-    except Exception as e:
-        current_app.logger.error(f"Errore nel caricamento stati plugin: {e}")
-        return {} 
+    return {}
+
+def save_plugin_status(status):
+    """Salva lo stato dei plugin nel file di configurazione"""
+    status_file = get_plugin_status_file()
+    with open(status_file, 'w') as f:
+        json.dump(status, f, indent=4) 

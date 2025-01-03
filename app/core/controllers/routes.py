@@ -12,7 +12,8 @@ from app import db
 from werkzeug.security import generate_password_hash
 import os
 from app.core.forms import RegistrationForm
-from app.core.utils.plugin_manager import save_plugin_status
+from app.core.utils.plugin_manager import save_plugin_status, load_plugin_status
+from app.plugins import init_plugins
 
 # Creazione del blueprint con il nuovo namespace
 main = Blueprint('main', __name__, url_prefix='')
@@ -247,29 +248,61 @@ def debug_config():
 @login_required
 @role_required('admin')
 def toggle_plugin(plugin_name):
+    """Attiva/disattiva un plugin"""
     try:
+        # Trova il plugin
         plugin = next((p for p in current_app.plugins if p.name == plugin_name), None)
-        
         if not plugin:
-            return jsonify({
-                'status': 'error',
-                'message': f'Plugin {plugin_name} non trovato'
-            }), 404
-            
-        new_status = plugin.toggle_status()
+            return jsonify({'success': False, 'message': 'Plugin non trovato'}), 404
+
+        # Toggle dello stato
+        plugin.is_active = not plugin.is_active
         
         # Salva lo stato
-        save_plugin_status(plugin_name, new_status)
+        plugin_status = load_plugin_status()
+        plugin_status[plugin_name] = plugin.is_active
+        save_plugin_status(plugin_status)
         
+        current_app.logger.info(f"Plugin {plugin_name} {'attivato' if plugin.is_active else 'disattivato'}")
+        
+        # Invece di manipolare i blueprint, restituiamo un segnale per riavviare
         return jsonify({
-            'status': 'success',
-            'message': f"Plugin {plugin_name} {'attivato' if new_status else 'disattivato'} con successo",
-            'is_active': new_status
+            'success': True,
+            'message': f"Plugin {plugin_name} {'attivato' if plugin.is_active else 'disattivato'}. Riavvia l'applicazione per applicare le modifiche.",
+            'requiresRestart': True
         })
         
     except Exception as e:
-        current_app.logger.error(f"Errore nel toggle plugin: {str(e)}")
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 500
+        current_app.logger.error(f"Errore durante il toggle del plugin {plugin_name}: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@main.route('/admin/plugins/reinit', methods=['POST'])
+@login_required
+@role_required('admin')
+def reinit_plugins():
+    """Reinizializza tutti i plugin"""
+    try:
+        # Carica lo stato corrente dei plugin
+        plugin_status = load_plugin_status()
+        
+        # Rimuovi tutti i blueprint esistenti
+        plugins_to_remove = []
+        for name, blueprint in current_app.blueprints.items():
+            if any(p.blueprint and p.blueprint.name == name for p in current_app.plugins):
+                plugins_to_remove.append(name)
+        
+        for name in plugins_to_remove:
+            current_app.blueprints.pop(name)
+        
+        # Aggiorna lo stato e registra i blueprint attivi
+        for plugin in current_app.plugins:
+            plugin.is_active = plugin_status.get(plugin.name, True)
+            if plugin.is_active and plugin.blueprint:
+                current_app.register_blueprint(plugin.blueprint)
+        
+        current_app.logger.info("Plugin reinizializzati con successo")
+        return jsonify({'success': True, 'message': 'Plugin reinizializzati con successo'})
+        
+    except Exception as e:
+        current_app.logger.error(f"Errore durante la reinizializzazione dei plugin: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
