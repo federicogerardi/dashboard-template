@@ -70,3 +70,4 @@ tests/
 *.pytest_cache
 .coverage
 htmlcov/
+app/plugins/plugin_di_test/

@@ -230,11 +230,11 @@ body {
 }
 
 [data-bs-theme="dark"] .breadcrumb-item a {
-    color: var(--bs-primary);
+    color: rgba(255, 255, 255, 0.9);
 }
 
 [data-bs-theme="dark"] .breadcrumb-item.active {
-    color: var(--bs-secondary);
+    color: rgba(255, 255, 255, 0.7);
 }
 
 /* Timeline specifica per tema scuro */
@@ -550,3 +550,13 @@ body {
 
 /* Quando non c'è la breadcrumb (pagine pubbliche o index), 
    il contenuto prende il margin-top dalla classe mt-4 */ 
+
+/* Effetto hover più visibile */
+.breadcrumb-item a:hover {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+[data-bs-theme="dark"] .breadcrumb-item a:hover {
+    color: #ffffff;
+} 
