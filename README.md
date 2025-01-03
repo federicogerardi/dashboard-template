@@ -78,7 +78,7 @@ Un esempio di plugin è fornito nella directory `plugins/demo_plugin/`, che incl
 
 1. Clona il repository:
    ```
-   git clone <repository-url>
+   git clone https://github.com/federicogerardi/dashboard-template.git
    cd <repository-directory>
    ```
 
@@ -94,9 +94,9 @@ Un esempio di plugin è fornito nella directory `plugins/demo_plugin/`, che incl
    flask run
    ```
 
-## Contribuzione
+## Contributi
 
-Le contribuzioni sono benvenute! Se desideri contribuire, apri una pull request o segnalaci eventuali problemi.
+I contributi sono benvenuti! Se desideri contribuire, apri una pull request o segnalami eventuali problemi.
 
 ## Licenza
 
