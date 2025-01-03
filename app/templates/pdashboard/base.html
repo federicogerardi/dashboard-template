@@ -10,99 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='pdashboard/css/style.css') }}">
-    <style>
-        /* Stile icone per adattarsi al tema */
-        [data-bs-theme="light"] .fas,
-        [data-bs-theme="light"] .fa-4x,
-        [data-bs-theme="light"] .fa-3x,
-        [data-bs-theme="light"] .fa-2x {
-            color: var(--bs-primary);
-        }
-        
-        [data-bs-theme="dark"] .fas,
-        [data-bs-theme="dark"] .fa-4x,
-        [data-bs-theme="dark"] .fa-3x,
-        [data-bs-theme="dark"] .fa-2x {
-            color: var(--bs-primary);
-        }
-
-        /* Timeline specifica per tema scuro */
-        [data-bs-theme="dark"] .timeline-item {
-            border-left-color: var(--bs-border-color);
-        }
-
-        [data-bs-theme="dark"] .timeline-item i {
-            background-color: var(--bs-body-bg);
-        }
-
-        /* Stili generali per le card */
-        .card {
-            border-color: var(--bs-border-color);
-            background-color: var(--bs-body-bg);
-        }
-
-        .card-header {
-            background-color: var(--bs-body-bg);
-            border-bottom-color: var(--bs-border-color);
-        }
-
-        /* Gestione colore icone nei button */
-        .btn-outline-primary:hover i {
-            color: var(--bs-white) !important;
-        }
-
-        .btn-outline-danger:hover i {
-            color: var(--bs-white) !important;
-        }
-
-        /* Specifica per dark mode */
-        [data-bs-theme="dark"] .btn-outline-primary:hover i {
-            color: var(--bs-white) !important;  /* Forza il colore bianco in hover */
-        }
-
-        /* Per i button outline in tema scuro */
-        [data-bs-theme="dark"] .btn-outline-primary {
-            --bs-btn-hover-color: var(--bs-white);
-            --bs-btn-active-color: var(--bs-white);
-        }
-
-        /* Per i button primari */
-        .btn-primary i {
-            color: var(--bs-white) !important;
-        }
-
-        /* Per i button nella navbar */
-        .navbar .btn i {
-            color: inherit !important;
-        }
-
-        /* Gestione hover nelle card della home */
-        .home-card:hover i {
-            transform: scale(1.1);
-            transition: transform 0.3s ease;
-        }
-
-        /* Transizione smooth per le icone */
-        .fas {
-            transition: color 0.2s ease;
-        }
-
-        /* Transizione smooth per le icone */
-        .btn i {
-            transition: color 0.2s ease;
-        }
-
-        /* Stile navbar per tema scuro */
-        [data-bs-theme="dark"] .navbar {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-        }
-
-        /* Stile navbar per tema chiaro */
-        [data-bs-theme="light"] .navbar {
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-        }
-    </style>
     {% block styles %}{% endblock %}
 </head>
 <body>
@@ -179,7 +86,7 @@
     {% if current_user.is_authenticated %}
     <div class="container-fluid bg-light border-bottom py-2 mb-4">
         <div class="container">
-            <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '›';">
+            <nav aria-label="breadcrumb">
                 <ol class="breadcrumb m-0">
                     <li class="breadcrumb-item">
                         <a href="{{ url_for('main.dashboard') }}" class="text-decoration-none">

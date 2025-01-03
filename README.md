@@ -76,16 +76,29 @@ Un esempio di plugin è fornito nella directory `plugins/demo_plugin/`, che incl
 
 ## 🛠️ Installazione
 
-1. Aggiungi il mio repository come origine remota:  
-```  
-git remote add upstream https://github.com/federicogerardi/dashboard-template.git  
+1. Aggiungi il repository come origine remota:  
+```bash
+git remote add upstream https://github.com/federicogerardi/dashboard-template.git
 ```
-2. Installa le dipendenze:  
-```  
-pip install -r requirements.txt  
+
+2. Gestione delle dipendenze:
+   - Il file `requirements-base.txt` contiene le dipendenze base del template
+   - Usa `requirements.txt` per le tue dipendenze aggiuntive:
+```requirements.txt
+-r requirements-base.txt
+
+# Le tue dipendenze personalizzate
+pandas==2.2.0
+numpy==1.26.3
 ```
-3. Configura il file `.env` per le variabili d'ambiente necessarie.
-4. Avvia l'app:  
+
+3. Installa le dipendenze:
+```bash
+pip install -r requirements.txt
+```
+
+4. Configura il file `.env` per le variabili d'ambiente necessarie.
+5. Avvia l'app:  
 ```  
 flask run  
 ```

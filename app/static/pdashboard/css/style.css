@@ -215,4 +215,63 @@ body {
 
 [data-bs-theme="dark"] .breadcrumb-item.active {
     color: var(--bs-secondary);
+}
+
+/* Stile icone per adattarsi al tema */
+[data-bs-theme="light"] .fas,
+[data-bs-theme="light"] .fa-4x,
+[data-bs-theme="light"] .fa-3x,
+[data-bs-theme="light"] .fa-2x {
+    color: var(--bs-primary);
+}
+
+[data-bs-theme="dark"] .fas,
+[data-bs-theme="dark"] .fa-4x,
+[data-bs-theme="dark"] .fa-3x,
+[data-bs-theme="dark"] .fa-2x {
+    color: var(--bs-primary);
+}
+
+/* Timeline specifica per tema scuro */
+[data-bs-theme="dark"] .timeline-item {
+    border-left-color: var(--bs-border-color);
+}
+
+[data-bs-theme="dark"] .timeline-item i {
+    background-color: var(--bs-body-bg);
+}
+
+/* Gestione colore icone nei button */
+.btn-outline-primary:hover i {
+    color: var(--bs-white) !important;
+}
+
+.btn-outline-danger:hover i {
+    color: var(--bs-white) !important;
+}
+
+/* Specifica per dark mode */
+[data-bs-theme="dark"] .btn-outline-primary:hover i {
+    color: var(--bs-white) !important;
+}
+
+/* Per i button outline in tema scuro */
+[data-bs-theme="dark"] .btn-outline-primary {
+    --bs-btn-hover-color: var(--bs-white);
+    --bs-btn-active-color: var(--bs-white);
+}
+
+/* Per i button primari */
+.btn-primary i {
+    color: var(--bs-white) !important;
+}
+
+/* Per i button nella navbar */
+.navbar .btn i {
+    color: inherit !important;
+}
+
+/* Breadcrumb divider */
+.breadcrumb {
+    --bs-breadcrumb-divider: '›';
 } 
