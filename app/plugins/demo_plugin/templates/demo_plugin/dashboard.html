@@ -1,0 +1,46 @@
+{% extends "pdashboard/base.html" %}
+
+{% block title %}Demo Plugin - Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header Section -->
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="mb-4">
+                <i class="fas fa-flask fa-4x text-primary"></i>
+            </div>
+            <h1 class="display-4 mb-4">Demo Plugin Dashboard</h1>
+            <p class="lead mb-4">
+                Gestisci e monitora le tue statistiche
+            </p>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card h-100 demo-plugin-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-2x text-primary mb-3"></i>
+                    <h5 class="card-title">Valore 1</h5>
+                    <p class="display-6">{{ stats.value1 }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- Altri stats cards... -->
+    </div>
+
+    <!-- Actions Section -->
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <button class="btn btn-outline-primary" id="configDemo">
+                <i class="fas fa-cog me-2"></i>Configura
+            </button>
+            <a href="{{ url_for('demo_plugin.stats') }}" class="btn btn-primary ms-2">
+                <i class="fas fa-chart-bar me-2"></i>Statistiche Dettagliate
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

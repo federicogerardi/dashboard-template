@@ -14,6 +14,10 @@ class BaseConfig:
     }
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(instance_path, 'app.db')
+    
+    # Configurazione index
+    DEFAULT_INDEX_TEMPLATE = 'pdashboard/index.html'
+    PREFERRED_INDEX_PLUGIN = None  # Nome del plugin da usare per l'index
 
 class DevelopmentConfig(BaseConfig):
     """Configurazione per sviluppo"""

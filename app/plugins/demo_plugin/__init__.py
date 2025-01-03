@@ -11,6 +11,8 @@ class DemoPlugin(DashboardExtension):
             static_folder='static',
             url_prefix='/demo'
         )
+        self.provides_index = False  # Disattiva la gestione dell'index
+        self.index_priority = 0      # Azzera la priorità
         
         # Registra le routes
         from . import routes

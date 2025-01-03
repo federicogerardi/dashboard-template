@@ -23,6 +23,8 @@ class DashboardExtension:
     def __init__(self, name: str):
         self.name = name
         self.blueprint = None
+        self.index_priority = 0  # Priorità default per l'index
+        self.provides_index = False  # Flag per indicare se fornisce un index
     
     def init_app(self, app):
         """Inizializza l'estensione con l'app Flask"""
@@ -36,3 +38,14 @@ class DashboardExtension:
     def get_admin_views(self) -> List[Dict[str, Any]]:
         """Restituisce le estensioni del pannello admin"""
         return [] 
+    
+    def get_index_template(self) -> str:
+        """Restituisce il template da usare per l'index"""
+        if self.provides_index:
+            # Usa il namespace del blueprint per trovare il template
+            return f"{self.blueprint.name}/index.html"
+        return None
+    
+    def get_index_context(self) -> dict:
+        """Restituisce il contesto da passare al template dell'index"""
+        return {} 

@@ -1,119 +1,79 @@
 {% extends "pdashboard/base.html" %}
 
-{% block title %}Demo Plugin{% endblock %}
-
-{% block breadcrumb %}
-<li class="breadcrumb-item">
-    <a href="{{ url_for('demo_plugin.index') }}" class="text-decoration-none">
-        <i class="fas fa-flask me-1"></i>Demo Plugin
-    </a>
-</li>
-<li class="breadcrumb-item active" aria-current="page">Dashboard</li>
-{% endblock %}
+{% block title %}Personal Dashboard - Demo Plugin{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3">Demo Plugin Dashboard</h1>
-        <div>
-            <a href="{{ url_for('demo_plugin.stats') }}" class="btn btn-outline-primary me-2">
-                <i class="fas fa-chart-line me-2"></i>Statistiche Dettagliate
-            </a>
-            <button class="btn btn-primary" id="refreshChart">
-                <i class="fas fa-sync-alt"></i> Aggiorna
-            </button>
+<div class="container py-5">
+    <!-- Header Section -->
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="mb-4">
+                <i class="fas fa-flask fa-4x text-primary"></i>
+            </div>
+            <h1 class="display-4 mb-4">Demo Plugin Dashboard</h1>
+            <p class="lead mb-4">
+                Benvenuto nella versione demo della dashboard personalizzata
+            </p>
         </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Valore 1</h5>
-                    <p class="display-6">{{ stats.value1 }}</p>
-                    <small class="text-muted">
-                        <i class="fas fa-arrow-up text-success"></i> +15% rispetto a ieri
-                    </small>
+    <!-- Features Section -->
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-10">
+            <div class="row g-4">
+                <!-- Feature 1 -->
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm demo-plugin-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-chart-line fa-2x text-primary mb-3"></i>
+                            <h5 class="card-title">Statistiche in Tempo Reale</h5>
+                            <p class="card-text">Monitora i tuoi dati con grafici interattivi e aggiornamenti in tempo reale</p>
+                            <a href="{{ url_for('demo_plugin.stats') }}" class="btn btn-outline-primary mt-3">
+                                Visualizza Statistiche
+                            </a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Valore 2</h5>
-                    <p class="display-6">{{ stats.value2 }}</p>
-                    <small class="text-muted">
-                        <i class="fas fa-arrow-down text-danger"></i> -5% rispetto a ieri
-                    </small>
+                
+                <!-- Feature 2 -->
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm demo-plugin-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-table fa-2x text-primary mb-3"></i>
+                            <h5 class="card-title">Dashboard Interattiva</h5>
+                            <p class="card-text">Esplora i dati attraverso una dashboard interattiva e personalizzabile</p>
+                            <a href="{{ url_for('demo_plugin.index') }}" class="btn btn-outline-primary mt-3">
+                                Apri Dashboard
+                            </a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Valore 3</h5>
-                    <p class="display-6">{{ stats.value3 }}</p>
-                    <small class="text-muted">
-                        <i class="fas fa-equals text-warning"></i> Nessuna variazione
-                    </small>
+                
+                <!-- Feature 3 -->
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm demo-plugin-card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-cog fa-2x text-primary mb-3"></i>
+                            <h5 class="card-title">Configurazione Semplice</h5>
+                            <p class="card-text">Personalizza la tua esperienza con pochi click</p>
+                            <button class="btn btn-outline-primary mt-3" id="configDemo">
+                                Configura
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Chart -->
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Grafico Demo</h5>
-            <canvas id="demoChart"></canvas>
-        </div>
-    </div>
+   
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-let demoChart;
-
-async function updateChart() {
-    try {
-        const response = await fetch('/demo/chart');
-        const data = await response.json();
-        
-        if (!demoChart) {
-            const ctx = document.getElementById('demoChart').getContext('2d');
-            demoChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        label: 'Dati Demo',
-                        data: data.values,
-                        borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        }
-                    }
-                }
-            });
-        } else {
-            demoChart.data.datasets[0].data = data.values;
-            demoChart.update();
-        }
-    } catch (error) {
-        console.error('Errore nel caricamento dei dati:', error);
-    }
-}
-
-document.addEventListener('DOMContentLoaded', updateChart);
-document.getElementById('refreshChart').addEventListener('click', updateChart);
+document.getElementById('configDemo').addEventListener('click', function() {
+    alert('Funzionalità di configurazione in sviluppo!');
+});
 </script>
-{% endblock %} 
+{% endblock %}

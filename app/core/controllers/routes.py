@@ -18,7 +18,38 @@ main = Blueprint('main', __name__, url_prefix='')
 
 @main.route('/')
 def index():
-    return render_template('pdashboard/index.html')
+    """Gestisce la visualizzazione dell'index page"""
+    # Cerca il plugin preferito se configurato
+    if current_app.config.get('PREFERRED_INDEX_PLUGIN'):
+        preferred = next(
+            (p for p in current_app.plugins 
+             if p.name == current_app.config['PREFERRED_INDEX_PLUGIN']),
+            None
+        )
+        if preferred and preferred.provides_index:
+            current_app.logger.info(f"Usando index del plugin preferito: {preferred.name}")
+            return render_template(
+                preferred.get_index_template(),
+                **preferred.get_index_context()
+            )
+    
+    # Altrimenti cerca il plugin con priorità più alta
+    index_plugins = [p for p in current_app.plugins if p.provides_index]
+    if index_plugins:
+        # Ordina per priorità (decrescente) e nome (crescente per parità)
+        provider = sorted(
+            index_plugins,
+            key=lambda x: (-x.index_priority, x.name)
+        )[0]
+        current_app.logger.info(f"Usando index del plugin con priorità più alta: {provider.name}")
+        return render_template(
+            provider.get_index_template(),
+            **provider.get_index_context()
+        )
+    
+    # Fallback al template di default
+    current_app.logger.info("Nessun plugin fornisce index, uso template default")
+    return render_template(current_app.config['DEFAULT_INDEX_TEMPLATE'])
 
 @main.route('/dashboard')
 @login_required

@@ -5,12 +5,13 @@ from datetime import datetime, timedelta
 
 @login_required
 def index():
+    """Pagina principale del plugin"""
     stats = {
         'value1': random.randint(100, 1000),
         'value2': random.randint(50, 500),
         'value3': random.randint(10, 100)
     }
-    return render_template('demo_plugin/index.html', stats=stats)
+    return render_template('demo_plugin/dashboard.html', stats=stats)
 
 @login_required
 def chart():
