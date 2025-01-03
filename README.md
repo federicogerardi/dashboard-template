@@ -37,18 +37,24 @@ La struttura del progetto è organizzata come segue:
 
 ```
 app/
-├── __init__.py
 ├── core/
 │   ├── controllers/
 │   ├── models/
 │   └── utils/
 ├── extensions/
 ├── plugins/
-│   ├── demo_plugin/
-│   └── ...
-├── templates/
+│   └── demo_plugin/
+│       ├── static/
+│       │   └── demo_plugin/
+│       │       └── css/
+│       └── templates/
+│           └── demo_plugin/
+├── static/
 │   └── pdashboard/
-└── static/
+│       └── css/
+└── templates/
+    └── pdashboard/
+        └── auth/
 ```
 
 ### 🧩 Gestione dei Plugin
