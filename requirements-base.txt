@@ -11,7 +11,7 @@ Flask-Talisman==1.1.0
 redis>=4.5.1
 
 # Aggiunte per sicurezza
-python-jose[cryptography]==3.3.0
+PyJWT[crypto]==2.8.0
 argon2-cffi==21.3.0
 pyOpenSSL==23.2.0
 pytest==7.4.3

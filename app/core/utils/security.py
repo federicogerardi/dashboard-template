@@ -5,6 +5,9 @@ from hmac import compare_digest
 import html
 import unicodedata
 import os
+import jwt
+from jwt.exceptions import InvalidTokenError
+from datetime import datetime, timedelta
 
 def sanitize_input(text, allow_email=False):
     """Sanitizza input per prevenire XSS e injection"""
@@ -101,3 +104,33 @@ def validate_password(password: str) -> tuple[bool, str]:
         return False, 'La password deve contenere almeno un carattere speciale (@$!%*?&)'
     
     return True, ''
+
+def create_token(data: dict, expires_delta: timedelta = None) -> str:
+    """Crea un JWT token"""
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    
+    # Utilizzo di PyJWT invece di python-jose
+    encoded_jwt = jwt.encode(
+        to_encode, 
+        current_app.config['SECRET_KEY'], 
+        algorithm="HS256"
+    )
+    return encoded_jwt
+
+def decode_token(token: str) -> dict:
+    """Decodifica un JWT token"""
+    try:
+        # Utilizzo di PyJWT invece di python-jose
+        payload = jwt.decode(
+            token, 
+            current_app.config['SECRET_KEY'], 
+            algorithms=["HS256"]
+        )
+        return payload
+    except InvalidTokenError:
+        return None
