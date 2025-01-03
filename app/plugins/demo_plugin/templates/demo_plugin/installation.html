@@ -1,0 +1,162 @@
+{% extends "pdashboard/base.html" %}
+
+{% block title %}Installazione - Demo Plugin{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{{ url_for('demo_plugin.index') }}" class="text-decoration-none">
+        <i class="fas fa-flask me-1"></i>Demo Plugin
+    </a>
+</li>
+<li class="breadcrumb-item active" aria-current="page">
+    <i class="fas fa-book me-1"></i>Installazione
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-2">Creazione di un Nuovo Plugin</h1>
+            <p class="text-muted">Segui questa guida per creare un nuovo plugin utilizzando lo script automatico</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Prerequisiti -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list-check me-2"></i>
+                        Prerequisiti
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Accesso alla directory del progetto
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            Permessi di esecuzione per lo script create_plugin.sh
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Creazione Plugin -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-code me-2"></i>
+                        Creazione del Plugin
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3">1. Esegui lo script di creazione:</h6>
+                        <div class="bg-dark text-light p-3 rounded">
+                            <code>./scripts/create_plugin.sh "Il Mio Plugin"</code>
+                        </div>
+                        <small class="text-muted d-block mt-2">Inserisci il nome completo del plugin tra virgolette. Lo script genererà automaticamente i nomi tecnici necessari.</small>
+                    </div>
+
+                    <h6 class="fw-bold mb-3">2. Struttura generata:</h6>
+                    <div class="bg-dark text-light p-3 rounded">
+<pre><code>il_mio_plugin/              # Nome directory (generato automaticamente)
+├── __init__.py             # Configurazione del plugin
+├── routes.py              # Definizione delle route
+├── models.py              # Modelli del database
+├── static/
+│   └── il_mio_plugin/
+│       ├── css/          # Fogli di stile
+│       └── js/           # Script JavaScript
+└── templates/
+    └── il_mio_plugin/
+        └── dashboard.html # Template base</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personalizzazione -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-paint-brush me-2"></i>
+                        Personalizzazione
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Il plugin generato include:</p>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="fas fa-check text-primary me-2"></i>
+                            Blueprint Flask configurato con nome visualizzato personalizzato
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check text-primary me-2"></i>
+                            Integrazione automatica nel menu di navigazione
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check text-primary me-2"></i>
+                            Template responsive con breadcrumb e layout standard
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check text-primary me-2"></i>
+                            Struttura CSS/JS predisposta con stili di base
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar con Quick Links -->
+        <div class="col-md-4">
+            <div class="card sticky-top" style="top: 2rem;">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Suggerimenti
+                    </h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Nome del Plugin</h6>
+                                <small class="text-muted">Usa un nome descrittivo e completo (es: "Gestione Utenti Avanzata")</small>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Riavvio Applicazione</h6>
+                                <small class="text-muted">Riavvia Flask dopo la creazione per attivare il plugin</small>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Permessi Script</h6>
+                                <small class="text-muted">Esegui chmod +x scripts/create_plugin.sh prima dell'uso</small>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">Verifica Installazione</h6>
+                                <small class="text-muted">Controlla i log Flask per confermare l'attivazione</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

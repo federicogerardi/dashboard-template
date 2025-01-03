@@ -1,13 +1,63 @@
 #!/bin/bash
 
+# Funzione per la validazione del nome del plugin
+validate_plugin_name() {
+    local display_name="$1"
+    local max_length=50  # Lunghezza massima del nome visualizzato
+    local min_length=3   # Lunghezza minima del nome visualizzato
+    
+    # Controllo lunghezza minima
+    if [ ${#display_name} -lt $min_length ]; then
+        echo "Error: Il nome del plugin deve essere di almeno $min_length caratteri"
+        exit 1
+    fi
+    
+    # Controllo lunghezza massima
+    if [ ${#display_name} -gt $max_length ]; then
+        echo "Error: Il nome del plugin non può superare i $max_length caratteri"
+        exit 1
+    fi
+    
+    # Controllo caratteri non consentiti nel nome visualizzato
+    if [[ "$display_name" =~ [^a-zA-Z0-9àáâãäçèéêëìíîïñòóôõöùúûü\ \-] ]]; then
+        echo "Error: Il nome del plugin contiene caratteri non consentiti"
+        echo "Sono permessi solo lettere, numeri, spazi e trattini"
+        exit 1
+    fi
+}
+
 # Verifica se è stato fornito il nome del plugin
 if [ "$#" -ne 1 ]; then
-    echo "Usage: ./create_plugin.sh <plugin_name>"
-    echo "Example: ./create_plugin.sh my_plugin"
+    echo "Usage: ./create_plugin.sh \"<plugin display name>\""
+    echo "Example: ./create_plugin.sh \"Il Mio Plugin\""
     exit 1
 fi
 
-PLUGIN_NAME=$(echo "$1" | tr '-' '_')
+# Validazione del nome del plugin
+validate_plugin_name "$1"
+
+# Gestione nomi plugin
+PLUGIN_DISPLAY_NAME="$1"                                          # Nome visualizzato (es: "Il Mio Plugin")
+PLUGIN_NAME=$(echo "$1" | tr '[:upper:]' '[:lower:]' |          # Converti in lowercase
+              tr -d '[:punct:]' |                                # Rimuovi punteggiatura
+              tr 'àáâãäçèéêëìíîïñòóôõöùúûü' 'aaaaaceeeeiiiinooooouuuu' |  # Normalizza caratteri accentati
+              tr ' ' '_' |                                       # Sostituisci spazi con underscore
+              sed 's/__*/_/g')                                   # Rimuovi underscore multipli
+
+# Verifica lunghezza del nome tecnico
+PLUGIN_NAME_MAX_LENGTH=30
+if [ ${#PLUGIN_NAME} -gt $PLUGIN_NAME_MAX_LENGTH ]; then
+    echo "Error: Il nome tecnico del plugin (${PLUGIN_NAME}) supera i ${PLUGIN_NAME_MAX_LENGTH} caratteri"
+    echo "Usa un nome più breve o con meno parole"
+    exit 1
+fi
+
+# Verifica che il nome tecnico contenga solo caratteri validi
+if [[ ! "$PLUGIN_NAME" =~ ^[a-z][a-z0-9_]*$ ]]; then
+    echo "Error: Il nome tecnico del plugin deve iniziare con una lettera e contenere solo lettere minuscole, numeri e underscore"
+    exit 1
+fi
+
 PLUGIN_DIR="app/plugins/${PLUGIN_NAME}"
 
 # Verifica se il plugin esiste già
@@ -16,21 +66,37 @@ if [ -d "$PLUGIN_DIR" ]; then
     exit 1
 fi
 
-# Crea la struttura delle directory
-echo "Creating plugin structure for $PLUGIN_NAME..."
-mkdir -p "$PLUGIN_DIR"/{templates/"$PLUGIN_NAME",static/"$PLUGIN_NAME"/{css,js}}
+# Verifica i permessi della directory plugins
+if [ ! -w "app/plugins" ]; then
+    echo "Error: Non hai i permessi di scrittura nella directory app/plugins"
+    exit 1
+fi
 
-# Converti il nome del plugin in maiuscolo per il primo carattere
-PLUGIN_NAME_UPPER="$(tr '[:lower:]' '[:upper:]' <<< ${PLUGIN_NAME:0:1})${PLUGIN_NAME:1}"
+# Verifica spazio disponibile (minimo 1MB)
+available_space=$(df -P . | awk 'NR==2 {print $4}')
+if [ "$available_space" -lt 1024 ]; then
+    echo "Error: Spazio su disco insufficiente"
+    exit 1
+fi
+
+# Crea la struttura delle directory
+echo "Creating plugin structure for $PLUGIN_DISPLAY_NAME..."
+mkdir -p "$PLUGIN_DIR"/{templates/"$PLUGIN_NAME",static/"$PLUGIN_NAME"/{css,js}} || {
+    echo "Error: Impossibile creare la struttura delle directory"
+    exit 1
+}
+
+# Converti il nome del plugin per la classe Python
+PLUGIN_CLASS_NAME=$(echo "$PLUGIN_NAME" | sed -r 's/(^|_)([a-z])/\U\2/g')  # Convert to PascalCase
 
 # Crea __init__.py
 cat > "$PLUGIN_DIR/__init__.py" << EOL
 from flask import Blueprint
 from app.extensions.base import DashboardExtension, NavigationItem
 
-class ${PLUGIN_NAME_UPPER}Plugin(DashboardExtension):
+class ${PLUGIN_CLASS_NAME}Plugin(DashboardExtension):
     def __init__(self):
-        super().__init__('${PLUGIN_NAME_UPPER} Plugin')
+        super().__init__('${PLUGIN_DISPLAY_NAME}')  # Usa il nome visualizzato
         self.blueprint = Blueprint(
             '${PLUGIN_NAME}',
             __name__,
@@ -38,6 +104,8 @@ class ${PLUGIN_NAME_UPPER}Plugin(DashboardExtension):
             static_folder='static',
             url_prefix='/${PLUGIN_NAME}'
         )
+        self.provides_index = False
+        self.index_priority = 0
         
         # Registra le routes
         from . import routes
@@ -46,15 +114,15 @@ class ${PLUGIN_NAME_UPPER}Plugin(DashboardExtension):
     def get_navigation_items(self):
         return [
             NavigationItem(
-                name='${PLUGIN_NAME_UPPER} Plugin',
+                name='${PLUGIN_DISPLAY_NAME}',  # Usa il nome visualizzato
                 icon='fas fa-puzzle-piece',
                 url='/${PLUGIN_NAME}',
-                permission='user'
+                permission='user',
+                subitems=[]
             )
         ]
 
-# Istanza del plugin che verrà caricata automaticamente
-plugin = ${PLUGIN_NAME_UPPER}Plugin()
+plugin = ${PLUGIN_CLASS_NAME}Plugin()
 EOL
 
 # Crea routes.py
@@ -64,7 +132,8 @@ from flask_login import login_required
 
 @login_required
 def index():
-    return render_template('${PLUGIN_NAME}/index.html')
+    """Pagina principale del plugin"""
+    return render_template('${PLUGIN_NAME}/dashboard.html')
 EOL
 
 # Crea models.py
@@ -74,29 +143,40 @@ from app.extensions import db
 # Definisci qui i tuoi modelli
 EOL
 
-# Crea il template base
-cat > "$PLUGIN_DIR/templates/$PLUGIN_NAME/index.html" << EOL
+# Crea il template dashboard.html
+cat > "$PLUGIN_DIR/templates/$PLUGIN_NAME/dashboard.html" << EOL
 {% extends "pdashboard/base.html" %}
 
-{% block title %}${PLUGIN_NAME_UPPER} Plugin{% endblock %}
+{% block title %}${PLUGIN_DISPLAY_NAME} - Dashboard{% endblock %}
 
-{% block breadcrumb %}
-<li class="breadcrumb-item">
-    <a href="{{ url_for('${PLUGIN_NAME}.index') }}" class="text-decoration-none">
-        <i class="fas fa-puzzle-piece me-1"></i>${PLUGIN_NAME_UPPER} Plugin
-    </a>
-</li>
-<li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('${PLUGIN_NAME}.static', filename='css/style.css') }}">
 {% endblock %}
 
 {% block content %}
 <div class="container py-4">
-    <h1 class="h3 mb-4">${PLUGIN_NAME_UPPER} Plugin Dashboard</h1>
-    
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Benvenuto nel ${PLUGIN_NAME_UPPER} Plugin</h5>
-            <p class="card-text">Inizia a personalizzare questo plugin secondo le tue necessità.</p>
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-2">${PLUGIN_DISPLAY_NAME}</h1>
+            <p class="text-muted">Descrizione del plugin</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="btn btn-outline-primary" id="configPlugin">
+                <i class="fas fa-cog me-2"></i>Configura
+            </button>
+        </div>
+    </div>
+
+    <!-- Content Section -->
+    <div class="row g-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Contenuto Plugin</h5>
+                    <p>Implementa qui il contenuto del tuo plugin.</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -123,10 +203,13 @@ EOL
 # Imposta i permessi
 chmod -R 755 "$PLUGIN_DIR"
 
-echo "Plugin $PLUGIN_NAME created successfully!"
-echo "Directory structure:"
+echo "Plugin created successfully!"
+echo "Display Name: $PLUGIN_DISPLAY_NAME"
+echo "Technical Name: $PLUGIN_NAME"
+echo "Class Name: ${PLUGIN_CLASS_NAME}Plugin"
+echo -e "\nDirectory structure:"
 tree "$PLUGIN_DIR"
-echo -e "\nPer attivare il plugin, riavvia l'applicazione Flask." 
+echo -e "\nPer attivare il plugin, riavvia l'applicazione Flask."
 
 # Debug: Verifica il contenuto dei file generati
 echo -e "\nContenuto di __init__.py:"
@@ -138,5 +221,7 @@ ls -l "$PLUGIN_DIR"
 echo -e "\nVerifica della struttura del plugin:"
 find "$PLUGIN_DIR" -type f -exec echo {} \;
 
-echo -e "\nVerifica del modulo Python:"
-python3 -c "from app.plugins.${PLUGIN_NAME} import plugin; print(f'Plugin name: {plugin.name}')" 
+# Rimuovo questa verifica perché richiede l'ambiente Python attivo
+# e potrebbe fallire se l'app non è in esecuzione
+# echo -e "\nVerifica del modulo Python:"
+# python3 -c "from app.plugins.${PLUGIN_NAME} import plugin; print(f'Plugin name: {plugin.name}')" 

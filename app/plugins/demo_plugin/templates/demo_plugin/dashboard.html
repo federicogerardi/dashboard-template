@@ -2,45 +2,187 @@
 
 {% block title %}Demo Plugin - Dashboard{% endblock %}
 
+{% block styles %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts/dist/apexcharts.css">
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
+<div class="container py-4">
     <!-- Header Section -->
-    <div class="row justify-content-center">
-        <div class="col-md-8 text-center">
-            <div class="mb-4">
-                <i class="fas fa-flask fa-4x text-primary"></i>
-            </div>
-            <h1 class="display-4 mb-4">Demo Plugin Dashboard</h1>
-            <p class="lead mb-4">
-                Gestisci e monitora le tue statistiche
-            </p>
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-2">Demo Plugin Dashboard</h1>
+            <p class="text-muted">Panoramica delle statistiche e metriche principali</p>
         </div>
-    </div>
-
-    <!-- Stats Overview -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-4">
-            <div class="card h-100 demo-plugin-card">
-                <div class="card-body text-center">
-                    <i class="fas fa-chart-line fa-2x text-primary mb-3"></i>
-                    <h5 class="card-title">Valore 1</h5>
-                    <p class="display-6">{{ stats.value1 }}</p>
-                </div>
-            </div>
-        </div>
-        <!-- Altri stats cards... -->
-    </div>
-
-    <!-- Actions Section -->
-    <div class="row justify-content-center">
-        <div class="col-md-6 text-center">
+        <div class="col-md-4 text-end">
             <button class="btn btn-outline-primary" id="configDemo">
                 <i class="fas fa-cog me-2"></i>Configura
             </button>
             <a href="{{ url_for('demo_plugin.stats') }}" class="btn btn-primary ms-2">
-                <i class="fas fa-chart-bar me-2"></i>Statistiche Dettagliate
+                <i class="fas fa-chart-bar me-2"></i>Dettagli
             </a>
         </div>
     </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-primary bg-primary bg-opacity-10 rounded">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                        <span class="badge bg-success-subtle text-success">+15%</span>
+                    </div>
+                    <h3 class="fw-bold mb-1">{{ stats.value1 }}</h3>
+                    <span class="text-muted">Valore Totale</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-info bg-info bg-opacity-10 rounded">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                        <span class="badge bg-danger-subtle text-danger">-5%</span>
+                    </div>
+                    <h3 class="fw-bold mb-1">{{ stats.value2 }}</h3>
+                    <span class="text-muted">Utenti Attivi</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Trend Ultimi 7 Giorni</h5>
+                    <div id="trendChart" style="height: 200px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Statistiche Mensili</h5>
+                    <div id="monthlyChart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Distribuzione</h5>
+                    <div id="pieChart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+// Trend Chart
+var trendOptions = {
+    series: [{
+        name: 'Valore',
+        data: [31, 40, 28, 51, 42, 109, 100]
+    }],
+    chart: {
+        type: 'area',
+        height: 200,
+        toolbar: {
+            show: false
+        },
+        sparkline: {
+            enabled: true
+        }
+    },
+    stroke: {
+        curve: 'smooth',
+        width: 2
+    },
+    fill: {
+        type: 'gradient',
+        gradient: {
+            shadeIntensity: 1,
+            opacityFrom: 0.7,
+            opacityTo: 0.3
+        }
+    },
+    theme: {
+        mode: document.documentElement.getAttribute('data-bs-theme')
+    }
+};
+
+// Monthly Chart
+var monthlyOptions = {
+    series: [{
+        name: 'Vendite',
+        data: [44, 55, 57, 56, 61, 58, 63, 60, 66]
+    }, {
+        name: 'Visite',
+        data: [76, 85, 101, 98, 87, 105, 91, 114, 94]
+    }],
+    chart: {
+        type: 'bar',
+        height: 300,
+        toolbar: {
+            show: false
+        }
+    },
+    plotOptions: {
+        bar: {
+            horizontal: false,
+            columnWidth: '55%',
+            endingShape: 'rounded'
+        },
+    },
+    theme: {
+        mode: document.documentElement.getAttribute('data-bs-theme')
+    }
+};
+
+// Pie Chart
+var pieOptions = {
+    series: [44, 55, 13, 43, 22],
+    chart: {
+        type: 'pie',
+        height: 300
+    },
+    labels: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E'],
+    theme: {
+        mode: document.documentElement.getAttribute('data-bs-theme')
+    }
+};
+
+var trendChart = new ApexCharts(document.querySelector("#trendChart"), trendOptions);
+var monthlyChart = new ApexCharts(document.querySelector("#monthlyChart"), monthlyOptions);
+var pieChart = new ApexCharts(document.querySelector("#pieChart"), pieOptions);
+
+trendChart.render();
+monthlyChart.render();
+pieChart.render();
+
+// Aggiorna i grafici quando cambia il tema
+document.getElementById('themeSwitch').addEventListener('click', function() {
+    setTimeout(() => {
+        const theme = document.documentElement.getAttribute('data-bs-theme');
+        [trendChart, monthlyChart, pieChart].forEach(chart => {
+            chart.updateOptions({
+                theme: {
+                    mode: theme
+                }
+            });
+        });
+    }, 100);
+});
+</script>
 {% endblock %} 

@@ -2,6 +2,10 @@
 
 {% block title %}Statistiche Dettagliate - Demo Plugin{% endblock %}
 
+{% block styles %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts/dist/apexcharts.css">
+{% endblock %}
+
 {% block breadcrumb %}
 <li class="breadcrumb-item">
     <a href="{{ url_for('demo_plugin.index') }}" class="text-decoration-none">
@@ -14,83 +18,103 @@
 {% block content %}
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3">Statistiche Dettagliate</h1>
+        <div>
+            <h1 class="h3 mb-2">Statistiche Dettagliate</h1>
+            <p class="text-muted mb-0">Analisi approfondita dei dati</p>
+        </div>
         <a href="{{ url_for('demo_plugin.index') }}" class="btn btn-outline-primary">
-            <i class="fas fa-arrow-left me-2"></i>Torna alla Dashboard
+            <i class="fas fa-arrow-left me-2"></i>Dashboard
         </a>
     </div>
 
-    <!-- Riepilogo -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="card-title mb-0">
-                <i class="fas fa-chart-line me-2"></i>Riepilogo
-            </h5>
+    <!-- Riepilogo Cards -->
+    <div class="row g-4 mb-4">
+        {% for metric in [
+            {'title': 'Totale', 'value': stats.summary.total, 'icon': 'fa-chart-pie', 'color': 'primary'},
+            {'title': 'Media', 'value': stats.summary.average, 'icon': 'fa-calculator', 'color': 'success'},
+            {'title': 'Picco', 'value': stats.summary.peak, 'icon': 'fa-arrow-trend-up', 'color': 'warning'},
+            {'title': 'Ultimo Aggiornamento', 'value': stats.summary.last_update, 'icon': 'fa-clock', 'color': 'info'}
+        ] %}
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="feature-icon-small d-inline-flex align-items-center justify-content-center text-{{ metric.color }} bg-{{ metric.color }} bg-opacity-10 rounded p-3">
+                            <i class="fas {{ metric.icon }} fa-lg"></i>
+                        </div>
+                    </div>
+                    <h4 class="fw-bold mb-1">{{ metric.value }}</h4>
+                    <span class="text-muted small">{{ metric.title }}</span>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <div class="row g-4">
-                <div class="col-md-3">
-                    <div class="border-end">
-                        <h6 class="text-muted mb-2">Totale</h6>
-                        <h3>{{ stats.summary.total }}</h3>
-                    </div>
+        {% endfor %}
+    </div>
+
+    <!-- Grafici -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h5 class="card-title d-flex align-items-center mb-3">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Trend Giornaliero
+                    </h5>
+                    <div id="dailyTrendChart" style="height: 300px;"></div>
                 </div>
-                <div class="col-md-3">
-                    <div class="border-end">
-                        <h6 class="text-muted mb-2">Media</h6>
-                        <h3>{{ stats.summary.average }}</h3>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="border-end">
-                        <h6 class="text-muted mb-2">Picco</h6>
-                        <h3>{{ stats.summary.peak }}</h3>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <h6 class="text-muted mb-2">Ultimo aggiornamento</h6>
-                    <p>{{ stats.summary.last_update }}</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h5 class="card-title d-flex align-items-center mb-3">
+                        <i class="fas fa-chart-pie me-2"></i>
+                        Distribuzione Trend
+                    </h5>
+                    <div id="trendDistribution" style="height: 300px;"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Tabella dati giornalieri -->
+    <!-- Tabella dati -->
     <div class="card">
-        <div class="card-header">
-            <h5 class="card-title mb-0">
-                <i class="fas fa-calendar-day me-2"></i>Dati Giornalieri
+        <div class="card-header py-3">
+            <h5 class="card-title d-flex align-items-center mb-0">
+                <i class="fas fa-table me-2"></i>
+                Dettaglio Giornaliero
             </h5>
         </div>
-        <div class="card-body">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table">
+                <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th>Data</th>
+                            <th class="px-4">Data</th>
                             <th>Valore</th>
                             <th>Trend</th>
                             <th>Variazione</th>
+                            <th class="px-4">Grafico</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for day in stats.daily %}
                         <tr>
-                            <td>{{ day.date }}</td>
+                            <td class="px-4">{{ day.date }}</td>
                             <td>{{ day.value }}</td>
                             <td>
-                                {% if day.trend == 'up' %}
-                                    <i class="fas fa-arrow-up text-success"></i>
-                                {% elif day.trend == 'down' %}
-                                    <i class="fas fa-arrow-down text-danger"></i>
-                                {% else %}
-                                    <i class="fas fa-equals text-warning"></i>
-                                {% endif %}
+                                <span class="badge {% if day.trend == 'up' %}bg-success-subtle text-success{% elif day.trend == 'down' %}bg-danger-subtle text-danger{% else %}bg-warning-subtle text-warning{% endif %} d-inline-flex align-items-center">
+                                    <i class="fas {% if day.trend == 'up' %}fa-arrow-up{% elif day.trend == 'down' %}fa-arrow-down{% else %}fa-equals{% endif %} me-1"></i>
+                                    {{ {'up': 'In crescita', 'down': 'In calo', 'stable': 'Stabile'}[day.trend] }}
+                                </span>
                             </td>
                             <td>
                                 <span class="badge {% if day.percentage > 0 %}bg-success{% elif day.percentage < 0 %}bg-danger{% else %}bg-warning{% endif %}">
                                     {{ day.percentage }}%
                                 </span>
+                            </td>
+                            <td class="px-4" style="width: 150px;">
+                                <div class="spark-chart" data-value="{{ day.value }}"></div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -100,4 +124,113 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+// Prepara i dati per i grafici
+const dailyData = {{ stats.daily|tojson }};
+const dates = dailyData.map(d => d.date);
+const values = dailyData.map(d => d.value);
+
+// Grafico trend giornaliero
+var dailyTrendOptions = {
+    series: [{
+        name: 'Valore',
+        data: values
+    }],
+    chart: {
+        type: 'line',
+        height: 300,
+        toolbar: {
+            show: false
+        }
+    },
+    stroke: {
+        curve: 'smooth',
+        width: 3
+    },
+    xaxis: {
+        categories: dates
+    },
+    theme: {
+        mode: document.documentElement.getAttribute('data-bs-theme')
+    }
+};
+
+// Grafico distribuzione trend
+var distributionOptions = {
+    series: [
+        dailyData.filter(d => d.trend === 'up').length,
+        dailyData.filter(d => d.trend === 'down').length,
+        dailyData.filter(d => d.trend === 'stable').length
+    ],
+    chart: {
+        type: 'donut',
+        height: 300
+    },
+    labels: ['In crescita', 'In calo', 'Stabile'],
+    colors: ['#198754', '#dc3545', '#ffc107'],
+    theme: {
+        mode: document.documentElement.getAttribute('data-bs-theme')
+    }
+};
+
+var dailyTrendChart = new ApexCharts(document.querySelector("#dailyTrendChart"), dailyTrendOptions);
+var distributionChart = new ApexCharts(document.querySelector("#trendDistribution"), distributionOptions);
+
+dailyTrendChart.render();
+distributionChart.render();
+
+// Spark charts per ogni riga della tabella
+document.querySelectorAll('.spark-chart').forEach(function(element) {
+    const value = parseInt(element.dataset.value);
+    const sparkData = Array.from({length: 10}, () => Math.floor(Math.random() * value * 0.5 + value * 0.75));
+    
+    new ApexCharts(element, {
+        series: [{
+            data: sparkData
+        }],
+        chart: {
+            type: 'line',
+            height: 30,
+            sparkline: {
+                enabled: true
+            }
+        },
+        stroke: {
+            curve: 'smooth',
+            width: 2
+        },
+        theme: {
+            mode: document.documentElement.getAttribute('data-bs-theme')
+        }
+    }).render();
+});
+
+// Aggiorna i grafici quando cambia il tema
+document.getElementById('themeSwitch').addEventListener('click', function() {
+    setTimeout(() => {
+        const theme = document.documentElement.getAttribute('data-bs-theme');
+        [dailyTrendChart, distributionChart].forEach(chart => {
+            chart.updateOptions({
+                theme: {
+                    mode: theme
+                }
+            });
+        });
+        
+        // Aggiorna anche i spark charts
+        document.querySelectorAll('.spark-chart').forEach(element => {
+            const chart = ApexCharts.getChartByID(element.querySelector('.apexcharts-canvas').id);
+            chart.updateOptions({
+                theme: {
+                    mode: theme
+                }
+            });
+        });
+    }, 100);
+});
+</script>
 {% endblock %} 

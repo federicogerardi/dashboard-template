@@ -41,3 +41,18 @@ def stats():
         }
     }
     return render_template('demo_plugin/stats.html', stats=detailed_stats)
+
+@login_required
+def installation():
+    """Pagina con le istruzioni di installazione"""
+    installation_steps = {
+        'requirements': ['Python 3.8+', 'Flask 2.0+', 'SQLAlchemy 1.4+'],
+        'pip_packages': ['flask-login', 'flask-sqlalchemy', 'flask-migrate'],
+        'optional_packages': ['pytest', 'black', 'flake8'],
+        'configuration': {
+            'DATABASE_URL': 'postgresql://user:pass@localhost/dbname',
+            'SECRET_KEY': 'your-secret-key',
+            'DEBUG': 'False'
+        }
+    }
+    return render_template('demo_plugin/installation.html', steps=installation_steps)

@@ -14,7 +14,7 @@
 </head>
 <body>
     <!-- Navbar moderna -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-0">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('main.index') }}">Personal Dashboard</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -59,12 +59,12 @@
 
     <!-- Breadcrumb -->
     {% if current_user.is_authenticated and not request.endpoint == 'main.index' %}
-    <div class="container-fluid bg-light border-bottom py-2 mb-4">
+    <div class="container-fluid breadcrumb-container">
         <div class="container">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb m-0">
+            <nav aria-label="breadcrumb" class="py-2">
+                <ol class="breadcrumb d-flex align-items-center m-0">
                     <li class="breadcrumb-item">
-                        <a href="{{ url_for('main.dashboard') }}" class="text-decoration-none">
+                        <a href="{{ url_for('main.dashboard') }}" class="text-decoration-none d-flex align-items-center">
                             <i class="fas fa-home"></i>
                         </a>
                     </li>
@@ -76,7 +76,7 @@
     {% endif %}
 
     <!-- Container principale con sidebar -->
-    <div class="container">
+    <div class="container {% if not current_user.is_authenticated or request.endpoint == 'main.index' %}mt-4{% endif %}">
         <div class="row">
             {% if current_user.is_authenticated and plugins and not request.endpoint == 'main.index' %}
             <!-- Sidebar più compatta -->
@@ -97,7 +97,7 @@
                                             <!-- Voce con sottomenu: contenitore flex -->
                                             <div class="nav-item-with-submenu">
                                                 <a href="{{ nav_item.url }}" 
-                                                   class="list-group-item list-group-item-action flex-grow-1 {% if request.path == nav_item.url %}active{% endif %}">
+                                                   class="list-group-item list-group-item-action flex-grow-1">
                                                     <div class="d-flex align-items-center">
                                                         <i class="{{ nav_item.icon }} me-2"></i>
                                                         <span class="small">{{ nav_item.name }}</span>
@@ -108,7 +108,7 @@
                                                         data-bs-toggle="collapse" 
                                                         data-bs-target="#submenu-{{ loop.index }}"
                                                         aria-expanded="{{ 'true' if request.path.startswith(nav_item.url) else 'false' }}">
-                                                    <i class="fas fa-chevron-right submenu-icon"></i>
+                                                    <i class="fas fa-chevron-right submenu-icon {% if request.path.startswith(nav_item.url) %}rotate-90{% endif %}"></i>
                                                 </button>
                                             </div>
                                             <!-- Sottomenu -->
@@ -125,7 +125,7 @@
                                         {% else %}
                                             <!-- Voce senza sottomenu: link diretto -->
                                             <a href="{{ nav_item.url }}" 
-                                               class="list-group-item list-group-item-action d-flex align-items-center {% if request.path.startswith(nav_item.url) %}active{% endif %}">
+                                               class="list-group-item list-group-item-action d-flex align-items-center {% if request.path.rstrip('/') == nav_item.url.rstrip('/') %}active{% endif %}">
                                                 <div>
                                                     <i class="{{ nav_item.icon }} me-2"></i>
                                                     <span class="small">{{ nav_item.name }}</span>
