@@ -1,0 +1,8 @@
+/* Stili specifici del plugin */
+.prova_nuovo-card {
+    transition: transform 0.2s ease;
+}
+
+.prova_nuovo-card:hover {
+    transform: translateY(-5px);
+}

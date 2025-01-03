@@ -18,7 +18,7 @@
             <!-- Statistiche -->
             <div class="row mb-4">
                 <div class="col-md-4">
-                    <div class="card">
+                    <div class="card h-100">
                         <div class="card-body">
                             <h5 class="card-title">Utenti Totali</h5>
                             <p class="card-text display-6">{{ total_users }}</p>
@@ -26,7 +26,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card">
+                    <div class="card h-100">
                         <div class="card-body">
                             <h5 class="card-title">Utenti Attivi</h5>
                             <p class="card-text display-6">{{ active_users }}</p>
@@ -34,10 +34,86 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card">
+                    <div class="card h-100">
                         <div class="card-body">
-                            <h5 class="card-title">Utenti Inattivi</h5>
-                            <p class="card-text display-6">{{ inactive_users }}</p>
+                            <h5 class="card-title">
+                                <i class="fas fa-info-circle me-2 text-secondary"></i>
+                                Sistema
+                            </h5>
+                            <div class="mt-3">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        {% if 'sqlite' in database_url %}
+                                            <span class="badge bg-secondary">SQLite</span>
+                                        {% else %}
+                                            <span class="badge bg-info">PostgreSQL</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-auto">
+                                        {% if app_env == 'production' %}
+                                            <span class="badge bg-danger">Production</span>
+                                        {% elif app_env == 'testing' %}
+                                            <span class="badge bg-warning">Testing</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Development</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Plugins Attivi -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-puzzle-piece me-2"></i>
+                                Plugins Attivi
+                            </h5>
+                            <span class="badge bg-primary">{{ plugins|length }}</span>
+                        </div>
+                        <div class="card-body">
+                            {% if plugins %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Nome Plugin</th>
+                                                <th>URL Prefix</th>
+                                                <th>Stato</th>
+                                                <th>Permessi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for plugin in plugins %}
+                                            <tr>
+                                                <td>
+                                                    <i class="fas fa-plug me-2 text-primary"></i>
+                                                    {{ plugin.name }}
+                                                </td>
+                                                <td>
+                                                    <code>{{ plugin.blueprint.url_prefix }}</code>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-success">Attivo</span>
+                                                </td>
+                                                <td>
+                                                    {% for nav_item in plugin.get_navigation_items() %}
+                                                        <span class="badge bg-secondary">{{ nav_item.permission }}</span>
+                                                    {% endfor %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted mb-0">Nessun plugin attivo</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -89,28 +165,6 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
-            </div>
-
-            <!-- System Info -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <small class="text-muted">
-                        <i class="fas fa-info-circle me-2 text-secondary"></i>
-                        {% if 'sqlite' in database_url %}
-                            <span class="badge bg-secondary">SQLite</span>
-                        {% else %}
-                            <span class="badge bg-info">PostgreSQL</span>
-                        {% endif %}
-                        •
-                        {% if app_env == 'production' %}
-                            <span class="badge bg-danger">Production</span>
-                        {% elif app_env == 'testing' %}
-                            <span class="badge bg-warning">Testing</span>
-                        {% else %}
-                            <span class="badge bg-success">Development</span>
-                        {% endif %}
-                    </small>
                 </div>
             </div>
         </div>
