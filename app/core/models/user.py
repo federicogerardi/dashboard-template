@@ -22,7 +22,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256))
     role = db.Column(db.String(20), default=UserRole.USER.value)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_login = db.Column(db.DateTime, default=None)
+    last_login = db.Column(db.DateTime)  
     login_count = db.Column(db.Integer, default=0)
     theme_preference = db.Column(db.String(20), default='light')
     

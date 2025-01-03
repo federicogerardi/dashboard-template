@@ -71,3 +71,17 @@ tests/
 .coverage
 htmlcov/
 app/plugins/plugin_di_test/
+
+# Migrations
+migrations/versions/*
+!migrations/versions/.gitkeep
+!migrations/versions/README
+!migrations/versions/__pycache__/
+migrations/versions/__pycache__/*
+
+# Mantieni la struttura base delle migrations
+!migrations/
+!migrations/README
+!migrations/alembic.ini
+!migrations/env.py
+!migrations/script.py.mako

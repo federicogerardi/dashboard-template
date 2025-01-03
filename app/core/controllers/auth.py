@@ -13,62 +13,34 @@ from sqlalchemy.exc import SQLAlchemyError
 auth = Blueprint('auth', __name__)
 
 @auth.route('/login', methods=['GET', 'POST'])
-@limiter.limit("5 per minute")
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
     
     form = LoginForm()
     if form.validate_on_submit():
-        # Debug: stampa i dati ricevuti
-        print(f"Login attempt - username: {form.username.data}")
-        
-        # Cerca l'utente (case insensitive)
-        user = User.query.filter(
-            User.username.ilike(form.username.data.strip())
-        ).first()
-        
-        # Debug: verifica se l'utente è stato trovato
-        print(f"User found: {user}")
-        
+        user = User.query.filter_by(username=form.username.data.lower()).first()
         if user and user.check_password(form.password.data):
-            # Login riuscito
-            login_user(user, remember=form.remember_me.data)
-            
-            # Aggiorna statistiche login
-            user.login_count = (user.login_count or 0) + 1
+            # Aggiorna il timestamp di ultimo login e il contatore
             user.last_login = datetime.utcnow()
+            user.login_count += 1  # Incrementa anche il contatore degli accessi
             db.session.commit()
             
-            flash('Login effettuato con successo!', 'success')
+            # Effettua il login
+            login_user(user, remember=form.remember_me.data)
             
-            # Gestione redirect
+            # Redirect alla pagina richiesta o alla dashboard
             next_page = request.args.get('next')
-            if not next_page or urlparse(next_page).netloc != '':
-                next_page = url_for('main.dashboard')
-            return redirect(next_page)
-        else:
-            # Debug: stampa il motivo del fallimento
-            if not user:
-                print("Login failed: user not found")
-            else:
-                print("Login failed: wrong password")
+            return redirect(next_page if next_page else url_for('main.dashboard'))
             
-            flash('Username o password non validi', 'error')
-    
-    # Debug: stampa eventuali errori del form
-    if form.errors:
-        print(f"Form errors: {form.errors}")
-    
-    return render_template('pdashboard/auth/login.html', form=form)
+        flash('Username o password non validi', 'danger')
+    return render_template('auth/login.html', form=form)
 
 @auth.route('/logout')
 @login_required
 def logout():
+    # Non aggiorniamo last_login al logout
     logout_user()
-    if 'last_activity' in session:
-        session.pop('last_activity')
-    flash('Logout effettuato con successo.')
     return redirect(url_for('main.index'))
 
 @auth.route('/register', methods=['GET', 'POST'])
