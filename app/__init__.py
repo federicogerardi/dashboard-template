@@ -18,11 +18,6 @@ env_path = os.path.join(os.path.dirname(basedir), '.env')
 # Carica variabili d'ambiente PRIMA di tutto
 load_dotenv(env_path, override=True)
 
-# Debug per verificare il caricamento
-print("\nVariabili d'ambiente dopo load_dotenv:")
-print(f"DATABASE_URL: {os.getenv('DATABASE_URL')}")
-print(f"APP_ENV: {os.getenv('APP_ENV')}")
-
 # Inizializzazione delle estensioni
 db = SQLAlchemy()
 migrate = Migrate()

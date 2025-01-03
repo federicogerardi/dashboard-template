@@ -85,37 +85,25 @@
                 </div>
             </div>
 
-            <!-- Debug System Info -->
+            <!-- System Info -->
             <div class="card mb-4">
-                <div class="card-header bg-light d-flex align-items-center">
-                    <i class="fas fa-info-circle me-2 text-secondary"></i>
-                    <small class="fw-bold">System Info</small>
-                </div>
-                <div class="card-body py-2">
-                    <div class="row g-2">
-                        <div class="col-auto">
-                            <small class="text-muted">
-                                <strong>DB:</strong> 
-                                {% if 'sqlite' in database_url %}
-                                    <span class="badge bg-secondary">SQLite</span>
-                                {% else %}
-                                    <span class="badge bg-info">PostgreSQL</span>
-                                {% endif %}
-                            </small>
-                        </div>
-                        <div class="col-auto">
-                            <small class="text-muted">
-                                <strong>ENV:</strong> 
-                                {% if app_env == 'production' %}
-                                    <span class="badge bg-danger">Production</span>
-                                {% elif app_env == 'testing' %}
-                                    <span class="badge bg-warning">Testing</span>
-                                {% else %}
-                                    <span class="badge bg-success">Development</span>
-                                {% endif %}
-                            </small>
-                        </div>
-                    </div>
+                <div class="card-header bg-light">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-2 text-secondary"></i>
+                        {% if 'sqlite' in database_url %}
+                            <span class="badge bg-secondary">SQLite</span>
+                        {% else %}
+                            <span class="badge bg-info">PostgreSQL</span>
+                        {% endif %}
+                        •
+                        {% if app_env == 'production' %}
+                            <span class="badge bg-danger">Production</span>
+                        {% elif app_env == 'testing' %}
+                            <span class="badge bg-warning">Testing</span>
+                        {% else %}
+                            <span class="badge bg-success">Development</span>
+                        {% endif %}
+                    </small>
                 </div>
             </div>
         </div>
