@@ -2,6 +2,15 @@
 
 {% block title %}Demo Plugin{% endblock %}
 
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{{ url_for('demo_plugin.index') }}" class="text-decoration-none">
+        <i class="fas fa-flask me-1"></i>Demo Plugin
+    </a>
+</li>
+<li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">

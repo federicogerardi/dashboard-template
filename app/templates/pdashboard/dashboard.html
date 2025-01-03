@@ -2,6 +2,10 @@
 
 {% block title %}Dashboard - {{ current_user.username }}{% endblock %}
 
+{% block breadcrumb %}
+<li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+{% endblock %}
+
 {% block content %}
 <div class="dashboard">
     <!-- Widget di benvenuto -->

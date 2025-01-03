@@ -175,6 +175,24 @@
         </div>
     </nav>
 
+    <!-- Breadcrumb -->
+    {% if current_user.is_authenticated %}
+    <div class="container-fluid bg-light border-bottom py-2 mb-4">
+        <div class="container">
+            <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '›';">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for('main.dashboard') }}" class="text-decoration-none">
+                            <i class="fas fa-home"></i>
+                        </a>
+                    </li>
+                    {% block breadcrumb %}{% endblock %}
+                </ol>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Container principale -->
     <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}

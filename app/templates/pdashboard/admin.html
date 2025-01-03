@@ -2,6 +2,13 @@
 
 {% block title %}Pannello Admin - {{ current_user.username }}{% endblock %}
 
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{{ url_for('main.admin_panel') }}" class="text-decoration-none">Admin</a>
+</li>
+<li class="breadcrumb-item active" aria-current="page">Gestione Utenti</li>
+{% endblock %}
+
 {% block content %}
 <div class="container">
     <div class="row">
@@ -29,8 +36,8 @@
                 <div class="col-md-4">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">Nuovi Utenti (24h)</h5>
-                            <p class="card-text display-6">{{ new_users }}</p>
+                            <h5 class="card-title">Utenti Inattivi</h5>
+                            <p class="card-text display-6">{{ inactive_users }}</p>
                         </div>
                     </div>
                 </div>

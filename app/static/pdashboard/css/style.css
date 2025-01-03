@@ -172,4 +172,47 @@ body {
 [data-bs-theme="dark"] .dropdown-item:hover {
     background-color: rgba(var(--bs-primary-rgb), 0.1);
     color: var(--bs-primary);
+}
+
+/* Stili per la breadcrumb */
+.breadcrumb {
+    font-size: 0.875rem;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    font-size: 1.1rem;
+    line-height: 1;
+    vertical-align: middle;
+    color: var(--bs-secondary);
+}
+
+.breadcrumb-item a {
+    color: var(--bs-primary);
+}
+
+.breadcrumb-item.active {
+    color: var(--bs-secondary);
+}
+
+/* Gestione icone nella breadcrumb */
+.breadcrumb-item i {
+    transition: opacity 0.2s ease;
+}
+
+.breadcrumb-item a:hover i {
+    opacity: 0.8;
+}
+
+/* Dark mode adjustments */
+[data-bs-theme="dark"] .bg-light {
+    background-color: var(--bs-dark) !important;
+    border-color: var(--bs-border-color) !important;
+}
+
+[data-bs-theme="dark"] .breadcrumb-item a {
+    color: var(--bs-primary);
+}
+
+[data-bs-theme="dark"] .breadcrumb-item.active {
+    color: var(--bs-secondary);
 } 

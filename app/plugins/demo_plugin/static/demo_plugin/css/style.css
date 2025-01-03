@@ -9,4 +9,16 @@
 
 #demoChart {
     min-height: 300px;
+}
+
+/* Stili specifici per la breadcrumb del plugin */
+.breadcrumb-item i.fa-flask {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+/* Hover effect per il link del plugin nella breadcrumb */
+.breadcrumb-item a:hover i.fa-flask {
+    opacity: 1;
+    transition: opacity 0.2s ease;
 } 
