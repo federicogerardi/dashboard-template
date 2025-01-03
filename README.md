@@ -1,35 +1,35 @@
 # 🌟 Personal Dashboard Template
 
-Ciao! 👋 Questo è un template Flask per aiutarti a iniziare rapidamente i tuoi progetti web con autenticazione e gestione utenti già implementati. È un progetto di studio personale che esplora le best practice di sicurezza e architettura in Flask. 
+Benvenuto! 👋 Questo è un template per applicazioni web basate su Flask, progettato per avviare rapidamente progetti con funzionalità di autenticazione e gestione utenti già integrate. Questo progetto esplora le migliori pratiche di sicurezza e architettura in Flask.
 
 ## 🚀 Caratteristiche
 
-- Sistema di autenticazione completo 🔐
-- Gestione ruoli utente (Admin, Editor, User) 👥
-- Pannello amministrativo 🛠️
-- Rate limiting ⏳
-- Logging di sicurezza 📜
-- Protezioni CSRF 🛡️
-- Validazione input ✅
-- Security headers configurati 🔒
-- Architettura modulare con supporto per plugin 🔌
-- Interfaccia utente reattiva con Bootstrap 🎨
+- **Autenticazione Completa**: Sistema di login sicuro.
+- **Gestione Ruoli**: Supporto per ruoli utente come Admin, Editor e User.
+- **Pannello Amministrativo**: Interfaccia per la gestione dell'applicazione.
+- **Rate Limiting**: Limita le richieste per proteggere le API.
+- **Logging di Sicurezza**: Tracciamento delle attività per la sicurezza.
+- **Protezioni CSRF**: Protezione contro attacchi Cross-Site Request Forgery.
+- **Validazione Input**: Controllo e sanificazione degli input utente.
+- **Security Headers**: Configurazione di intestazioni HTTP per la sicurezza.
+- **Architettura Modulare**: Supporto per plugin per estendere le funzionalità.
+- **Interfaccia Reattiva**: Design moderno con Bootstrap.
 
 ## 📋 Requisiti
 
-- Python 3.8+ 🐍
-- Redis (opzionale, per rate limiting) 🗄️
-- PostgreSQL (o altro database supportato da SQLAlchemy) 🗃️
+- **Python 3.8+**: Linguaggio di programmazione richiesto.
+- **Redis**: Opzionale, per il rate limiting.
+- **PostgreSQL**: Database consigliato, supportato da SQLAlchemy.
 
 ## 🔒 Sicurezza
 
-Il template implementa diverse misure di sicurezza come riferimento per progetti Flask:
-- Password hashing con Argon2 🔑
-- Protezione contro XSS 🚫
-- Rate limiting sulle API sensibili ⚖️
-- Sessioni sicure 🔒
-- Input sanitization 🧼
-- Protezione CSRF tramite Flask-WTF 🛡️
+Il template include diverse misure di sicurezza:
+
+- **Password Hashing**: Utilizzo di Argon2 per l'hashing delle password.
+- **Protezione XSS**: Difesa contro attacchi Cross-Site Scripting.
+- **Sessioni Sicure**: Gestione sicura delle sessioni utente.
+- **Sanitizzazione Input**: Pulizia degli input per prevenire attacchi.
+- **Protezioni CSRF**: Implementate tramite Flask-WTF.
 
 ## 📂 Struttura del Progetto
 
@@ -53,59 +53,59 @@ app/
 
 ### 🧩 Gestione dei Plugin
 
-Il sistema supporta l'aggiunta di plugin per estendere le funzionalità dell'app. I plugin possono essere facilmente integrati seguendo questi passaggi:
+Il sistema supporta l'aggiunta di plugin per estendere le funzionalità:
 
 1. **Creazione di un Plugin**:
-   - Crea una nuova cartella all'interno della directory `plugins/`.
-   - Implementa la classe del plugin estendendo `DashboardExtension`.
-   - Registra le rotte del plugin utilizzando un `Blueprint`.
+   - Crea una cartella in `plugins/`.
+   - Estendi `DashboardExtension` per la classe del plugin.
+   - Registra le rotte con un `Blueprint`.
 
 2. **Registrazione del Plugin**:
-   - I plugin vengono automaticamente scoperti e registrati all'avvio dell'app tramite la funzione `init_plugins()`.
+   - I plugin vengono scoperti e registrati automaticamente all'avvio tramite `init_plugins()`.
 
 3. **Navigazione**:
-   - Ogni plugin può fornire voci di navigazione personalizzate tramite il metodo `get_navigation_items()`.
+   - I plugin possono aggiungere voci di navigazione personalizzate con `get_navigation_items()`.
 
 ### 🎉 Esempio di Plugin
 
-Un esempio di plugin è fornito nella directory `plugins/demo_plugin/`, che include:
+Un esempio è disponibile in `plugins/demo_plugin/`, che include:
 
-- Un blueprint per gestire le rotte.
-- Template e stili specifici per il plugin.
-- Funzionalità di esempio per dimostrare l'integrazione.
+- Un blueprint per le rotte.
+- Template e stili specifici.
+- Funzionalità di esempio per l'integrazione.
 
 ## 🛠️ Installazione
 
-1. Aggiungi il repository come origine remota:  
-```bash
-git remote add upstream https://github.com/federicogerardi/dashboard-template.git
-```
+1. Aggiungi il repository come origine remota:
+   ```bash
+   git remote add upstream https://github.com/federicogerardi/dashboard-template.git
+   ```
 
 2. Gestione delle dipendenze:
-   - Il file `requirements-base.txt` contiene le dipendenze base del template
-   - Usa `requirements.txt` per le tue dipendenze aggiuntive:
-```requirements.txt
--r requirements-base.txt
+   - `requirements-base.txt` contiene le dipendenze base.
+   - Usa `requirements.txt` per aggiungere dipendenze personalizzate:
+   ```requirements.txt
+   -r requirements-base.txt
 
-# Le tue dipendenze personalizzate
-pandas==2.2.0
-numpy==1.26.3
-```
+   # Dipendenze personalizzate
+   pandas==2.2.0
+   numpy==1.26.3
+   ```
 
 3. Installa le dipendenze:
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-4. Configura il file `.env` per le variabili d'ambiente necessarie.
-5. Avvia l'app:  
-```  
-flask run  
-```
+4. Configura il file `.env` per le variabili d'ambiente.
+5. Avvia l'app:
+   ```bash
+   flask run
+   ```
 
 ## 🤝 Contributi
 
-I contributi sono sempre benvenuti! Se desideri contribuire, apri una pull request o segnalami eventuali problemi. Grazie! 🙏
+I contributi sono benvenuti! Apri una pull request o segnala problemi. Grazie! 🙏
 
 ## 📄 Licenza
 

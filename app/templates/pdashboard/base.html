@@ -58,7 +58,7 @@
     </nav>
 
     <!-- Breadcrumb -->
-    {% if current_user.is_authenticated %}
+    {% if current_user.is_authenticated and not request.endpoint == 'main.index' %}
     <div class="container-fluid bg-light border-bottom py-2 mb-4">
         <div class="container">
             <nav aria-label="breadcrumb">
@@ -78,7 +78,7 @@
     <!-- Container principale con sidebar -->
     <div class="container">
         <div class="row">
-            {% if current_user.is_authenticated and plugins %}
+            {% if current_user.is_authenticated and plugins and not request.endpoint == 'main.index' %}
             <!-- Sidebar più compatta -->
             <div class="col-md-2 mb-4">
                 <div class="card sidebar-card">
