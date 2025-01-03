@@ -31,29 +31,6 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a>
                         </li>
-                        
-                        <!-- Menu Plugins con dropdown -->
-                        {% if plugins %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Plugin
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                {% for plugin in plugins %}
-                                    {% for nav_item in plugin.get_navigation_items() %}
-                                        {% if not nav_item.permission or current_user.has_role(nav_item.permission) %}
-                                            <li>
-                                                <a class="dropdown-item" href="{{ nav_item.url }}">
-                                                    {{ nav_item.name }}
-                                                </a>
-                                            </li>
-                                        {% endif %}
-                                    {% endfor %}
-                                {% endfor %}
-                            </ul>
-                        </li>
-                        {% endif %}
-
                         {% if current_user.is_admin() %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('main.admin_panel') }}">Admin</a>
@@ -62,19 +39,17 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
                         </li>
+                        <li class="nav-item">
+                            <button class="theme-switch btn btn-link nav-link" id="themeSwitch">
+                                <i class="fas fa-sun" id="themeIcon"></i>
+                            </button>
+                        </li>
                     {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('auth.register') }}">Registrati</a>
-                        </li>
-                    {% endif %}
-                    {% if current_user.is_authenticated %}
-                        <li class="nav-item">
-                            <button class="theme-switch btn btn-link nav-link" id="themeSwitch">
-                                <i class="fas fa-sun" id="themeIcon"></i>
-                            </button>
                         </li>
                     {% endif %}
                 </ul>
@@ -100,20 +75,54 @@
     </div>
     {% endif %}
 
-    <!-- Container principale -->
+    <!-- Container principale con sidebar -->
     <div class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div class="row">
+            {% if current_user.is_authenticated and plugins %}
+            <!-- Sidebar più compatta -->
+            <div class="col-md-2 mb-4">
+                <div class="card sidebar-card">
+                    <div class="card-header py-2">
+                        <h6 class="card-title mb-0 small">
+                            <i class="fas fa-puzzle-piece me-1"></i>
+                            Estensioni
+                        </h6>
                     </div>
-                {% endfor %}
+                    <div class="list-group list-group-flush">
+                        {% for plugin in plugins %}
+                            {% for nav_item in plugin.get_navigation_items() %}
+                                {% if not nav_item.permission or current_user.has_role(nav_item.permission) %}
+                                    <a href="{{ nav_item.url }}" 
+                                       class="list-group-item list-group-item-action d-flex align-items-center {% if request.path.startswith(nav_item.url) %}active{% endif %}">
+                                        <i class="{{ nav_item.icon }} me-2"></i>
+                                        <span class="small">{{ nav_item.name }}</span>
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <!-- Contenuto principale più ampio -->
+            <div class="col-md-10">
+            {% else %}
+            <!-- Contenuto principale senza sidebar -->
+            <div class="col-12">
             {% endif %}
-        {% endwith %}
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
 
-        {% block content %}{% endblock %}
+                {% block content %}{% endblock %}
+            </div>
+        </div>
     </div>
 
     <!-- Bootstrap JS -->

@@ -274,4 +274,64 @@ body {
 /* Breadcrumb divider */
 .breadcrumb {
     --bs-breadcrumb-divider: '›';
+}
+
+/* Stili per la sidebar compatta */
+.sidebar-card {
+    font-size: 0.875rem;
+}
+
+.sidebar-card .card-header {
+    padding: 0.5rem 0.75rem;
+}
+
+.list-group-item {
+    border: none;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.list-group-item i {
+    width: 1.25rem;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+.list-group-item:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    color: var(--bs-primary);
+}
+
+.list-group-item.active {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sidebar-card {
+        margin-bottom: 1rem;
+    }
+    
+    .list-group-item {
+        padding: 0.75rem;
+    }
+    
+    .list-group-item i {
+        font-size: 1rem;
+    }
+}
+
+/* Dark mode adjustments */
+[data-bs-theme="dark"] .list-group-item {
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .list-group-item:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.2);
+}
+
+[data-bs-theme="dark"] .card {
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-border-color);
 } 
