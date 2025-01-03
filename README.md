@@ -34,19 +34,22 @@ Il template implementa diverse misure di sicurezza come riferimento per progetti
 ## Struttura del Progetto
 
 La struttura del progetto è organizzata come segue:
+
+```
 app/
-├── init.py
+├── __init__.py
 ├── core/
-│ ├── controllers/
-│ ├── models/
-│ └── utils/
+│   ├── controllers/
+│   ├── models/
+│   └── utils/
 ├── extensions/
 ├── plugins/
-│ ├── demo_plugin/
-│ └── ...
+│   ├── demo_plugin/
+│   └── ...
 ├── templates/
-│ └── pdashboard/
+│   └── pdashboard/
 └── static/
+```
 
 ### Gestione dei Plugin
 
