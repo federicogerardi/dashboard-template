@@ -32,7 +32,7 @@ def login():
                 next_page = url_for('main.dashboard')
             return redirect(next_page)
         flash('Username o password non validi', 'error')
-    return render_template('auth/login.html', form=form)
+    return render_template('pdashboard/auth/login.html', form=form)
 
 @auth.route('/logout')
 @login_required
@@ -85,7 +85,7 @@ def register():
             db.session.rollback()
             flash('Errore durante la registrazione. Riprova più tardi.', 'error')
     
-    return render_template('auth/register.html', form=form)
+    return render_template('pdashboard/auth/register.html', form=form)
 
 @auth.before_request
 def before_request():
